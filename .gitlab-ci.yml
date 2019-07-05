@@ -1,0 +1,21 @@
+image: benswift/comp1720-2019-gitlab-ci:0.2.0
+
+variables:
+  DEST_DIR: /srv/gitlab-ce-pages/staging/$CI_PIPELINE_ID/$CI_COMMIT_REF_NAME/$CI_PROJECT_PATH
+  COMP1720_TEST_URL: http://comp1720.cecs.anu.edu.au/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/
+
+# this task copies the sketch files to the COMP1720 test webserver so they can
+# be viewed on-campus
+page-deploy:
+  tags:
+    - comp1720
+  stage: deploy
+  when: always # we want deployment to happen even if e.g. SoO is invalid
+  only:
+    - master
+  script:
+    - mkdir -p $DEST_DIR
+    # copy assets folder, and all top-level .html and .js files
+    - cp -r assets *.html *.js $DEST_DIR
+    - echo "your sketch should be visible shortly (on campus only) at the test URL"
+    - echo $COMP1720_TEST_URL
