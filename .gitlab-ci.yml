@@ -19,3 +19,11 @@ page-deploy:
     - cp -r assets *.html *.js $DEST_DIR
     - echo "your sketch should be visible shortly (on campus only) at the test URL"
     - echo $COMP1720_TEST_URL
+
+# have you committed & pushed your nametag.png file
+nametag:
+  tags:
+    - comp1720
+  stage: test
+  script:
+    - python /validate.py exists ./nametag.png
