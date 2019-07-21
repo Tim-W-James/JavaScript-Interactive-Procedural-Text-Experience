@@ -28,3 +28,11 @@ nametag:
   stage: test
   script:
     - python /validate.py exists ./nametag.png
+
+# check that you've filled out your statement of originality
+statement-of-originality:
+  tags:
+    - comp1720
+  stage: test
+  script:
+    - python /validate.py schema ./statement-of-originality.yml $SCHEMA_BASE_URL/statement-of-originality.json
