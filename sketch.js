@@ -15,8 +15,8 @@ function setup() {
 function draw() {
   // your cool nametag code goes in this draw function
 
-  // replace my name with your name!
-  text("Ben", 100, height-100);
+  // replace "Name" with your name!
+  text("Name", 100, height-100);
 }
 
 // when you hit the spacebar, what's currently on the canvas will be saved (as a
