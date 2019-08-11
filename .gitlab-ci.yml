@@ -11,7 +11,6 @@ page-deploy:
   tags:
     - comp1720
   stage: deploy
-  when: always # we want deployment to happen even if e.g. SoO is invalid
   only:
     - master
   script:
