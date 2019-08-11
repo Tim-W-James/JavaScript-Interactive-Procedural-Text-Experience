@@ -1,28 +1,52 @@
+var backgroundImage;
+
+function preload() {
+  backgroundImage = loadImage('assets/windows-xp-bliss.jpg');
+}
+
 function setup() {
-  // create the canvas (800px wide, 600px high)
-  createCanvas(800, 600);
+  createCanvas(windowWidth, windowHeight);
 
-  // make the text nice and big - adjust the size parameter
-  // to make *your* name fit nicely on the nametag
-  textSize(150);
-
-  // draw a border to help you see the size
-  // this isn't compulsory (remove this code if you like)
-  strokeWeight(5);
-  rect(0, 0, width, height);
+  // since we're going to be drawing the background image at the same size each
+  // frame, we re-size it once here in setup()
+  backgroundImage.resize(windowWidth, windowHeight);
 }
 
 function draw() {
-  // your cool nametag code goes in this draw function
+  // this `image()` function call is just an example---you should change (or
+  // remove) it in your submitted assignment
+  image(backgroundImage, 0, 0);
 
-  // replace "Name" with your name!
-  text("Name", 100, height-100);
+  // you can keep this `drawWindow()` function call in your final sketch
+  drawWindow();
 }
 
-// when you hit the spacebar, what's currently on the canvas will be saved (as a
-// "nametag.png" file) to your downloads folder
-function keyTyped() {
-  if (key === " ") {
-	saveCanvas("nametag.png");
-  }
+function drawWindow() {
+  // start with a "push" so that we can go back to the current drawing state
+  // (e.g. fill/stroke colour) at the end of the function
+  push();
+  fill(230);
+  noStroke();
+
+  // the width (and height) of the window "edge"
+  var edge = 50;
+
+  // draw the background "walls"
+  rect(0, 0, edge, height);
+  rect(0, 0, width, edge);
+  rect(0, height-edge, width, edge);
+  rect(width-edge, 0, edge, height);
+
+  // now draw the window (including bars & sill)
+  stroke(130, 82, 1);
+  noFill();
+  strokeWeight(10);
+  rect(edge, edge, width-edge*2, height-edge*2);
+  line(edge, height/2, width-edge, height/2);
+  line(width/2, edge, width/2, height-edge);
+  fill(150, 92, 1);
+  rect(0+edge/2, height-edge*1.5, width-edge, edge/2);
+
+  // pop drawing context back to original state (i.e. when `push()` was called)
+  pop();
 }

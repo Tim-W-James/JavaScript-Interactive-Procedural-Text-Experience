@@ -24,9 +24,10 @@ code:
 # add as many "url+licence+comment" entries as necessary
 # (or remove it altogether if you haven't used any external assets)
 assets:
-  - comment:
-    url:
-    licence:
+  # NOTE: "Bliss" is just here as an example, you should remove it
+  - comment: "_Bliss_ by Charles O'Rear"
+    url: https://en.wikipedia.org/wiki/Bliss_(image)
+    licence: fair use
 
 
 # sign *your* name and uid here
