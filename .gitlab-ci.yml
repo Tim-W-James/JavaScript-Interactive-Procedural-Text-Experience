@@ -28,3 +28,12 @@ statement-of-originality:
   allow_failure: true
   script:
     - python /validate.py schema ./statement-of-originality.yml $SCHEMA_BASE_URL/statement-of-originality.json
+
+# have you committed & pushed your thumbnail.png file
+thumbnail:
+  tags:
+    - comp1720
+  stage: test
+  allow_failure: true
+  script:
+    - python /validate.py exists thumbnail.png
