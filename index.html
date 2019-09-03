@@ -2,10 +2,10 @@
 <html lang="">
 
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>my COMP1720 sketch</title>
-    <style> body {padding: 0; margin: 0;} </style>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>my COMP1720 sketch</title>
+	<style> body {padding: 0; margin: 0;} </style>
 
 	<!-- this is the main p5 library -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.min.js"></script>
@@ -33,9 +33,39 @@
 
 	<!-- here's where we include the actual sketch file -->
 	<script src="sketch.js"></script>
+
+	<!-- CSS styling for "back to gallery" button, remove scrollbars -->
+	<style> body {padding: 0; margin: 0; overflow: hidden;} </style>
+	<style>
+	 body {
+	   padding: 0;
+	   margin: 0;
+	 }
+	 nav {
+	   position: absolute;
+	   bottom: 0;
+	   right: 0;
+	   font-size: 24px;
+	   color: #eee;
+	   background-color: #222;
+	   padding: 20px;
+	   opacity: 0.5;
+	   transition: opacity 0.3s;
+	   font-family: sans-serif;
+
+	 }
+	 nav > a {
+	   color: #eee;
+	 }
+	 nav:hover {
+	   opacity: 1;
+	 }
+	</style>
+
   </head>
 
   <body>
+	<nav><a href=".." style="text-decoration: none;">back to gallery</a></nav>
   </body>
 
 </html>
