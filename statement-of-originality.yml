@@ -8,28 +8,20 @@ declaration: >-
 
 # add as many "name+comment" entries as necessary
 # (or remove it altogether if you haven't collaborated with anyone)
-collaboration:
-  - name:
-    comment: >-
 
 
 # add as many "url+licence+comment" entries as necessary
 # (or remove it altogether if you haven't used any external code)
-code:
-  - comment:
-    url:
-    licence:
 
 
 # add as many "url+licence+comment" entries as necessary
 # (or remove it altogether if you haven't used any external assets)
 assets:
-  # NOTE: "Bliss" is just here as an example, you should remove it
-  - comment: "_Bliss_ by Charles O'Rear"
-    url: https://en.wikipedia.org/wiki/Bliss_(image)
+  - comment: "Twitch Logo"
+    url: https://www.twitch.tv/
     licence: fair use
 
 
 # sign *your* name and uid here
-name:
-uid:
+name: Timothy James
+uid: u6947396
