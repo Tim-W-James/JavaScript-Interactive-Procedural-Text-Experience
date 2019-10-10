@@ -3,11 +3,14 @@
 *   Tim James - u6947396
 */
 
+// TODO add sounds
+
 // variable declaration
 let input, button, player, users, viewers, displayedViewers;
 let canvasWidth, canvasHeight, chatStatus, initialTime;
 let greetingMsg, choiceResponseMsg, idleChoiceMsg;
 let names, adjectives, nouns;
+let loopChoiceA, loopChoiceB, loopChoiceC;
 let playerName = "You";
 let lastUser = "";
 let lastMessage = "";
@@ -23,8 +26,11 @@ let maxMsgDelay = 100;
 let eventDelayA = 0;
 let eventDelayB = 0;
 let msgRows = 0;
+let prevLCB = 0;
+let prevLCC = 0;
 const initialViewers = 1000;
 let choices = [];
+let choicesLoop = [];
 let messages = [];
 let canvasFunctions = [];
 let currentEvents = [];
@@ -33,6 +39,24 @@ let isHoveringA = false;
 let isHoveringB = false;
 let isHoveringC = false;
 let hasEnteredName = false;
+let isChoiceLooping = false;
+
+// canvas variables
+let backgroundType = 0; // 0 : black, 1 : black, 2 : white, 3 : gray
+let shapeType = 0;      // 0 : unassigned, 1 : circle, 2 : square, 3 : triangle
+let colorType = 0;      // 0 : white/black, 1 : red, 2 : green, 3 : blue
+let movementType = 0;   // 0 : none, 1 : scatter, 2 : path, 3 : bounce
+let xDir = 10;
+let yDir = 10;
+let speedType = 0;      // 0 : medium, 1 : medium, 2 : slow, 3 : fast
+let nextPosX, nextPosY;
+let sizeType = 0;       // 0 : medium, 1 : large, 2 : small, 3 : random
+let fadeType = 0;       // 0 : medium, 1 : medium, 2 : slow, 3 : fast
+let colorShiftType = 0; // 0 : unassigned, 1 : none, 2 : saturation, 3 : hue
+let hue, saturation;
+let shapeColorR, shapeColorG, shapeColorB;
+let outlineType = 0;    // 0 : none, 1 : none, 2 : normal, 3 : thick
+let transType = 0;      // 0 : none, 1 : none, 2 : subtle, 3 : strong
 
 function preload() {
   // instantiate complex objects
@@ -43,6 +67,8 @@ function preload() {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  fill(0);
+  background(0);
 
   // setup input field properties
   input = createInput();
@@ -64,6 +90,10 @@ function setup() {
   // setup view number properties
   viewers = initialViewers;
   displayedViewers = Math.round(random(0.98*viewers, 1.02*viewers));
+
+  loopChoiceA = choicesLoop[0];
+  loopChoiceB = choicesLoop[0];
+  loopChoiceC = choicesLoop[0];
 }
 
 function draw() {
@@ -87,9 +117,14 @@ function draw() {
   }
   // once user has entered their name, run as normal
   else {
+    if (choicesMade > 9 && !isChoiceLooping) { // once out of choices, loop
+      isChoiceLooping = true;
+      generateLoopingChoices();
+    }
+
     // display elements
-    displayBackUI();
     displayCanvas(canvasFunctions);
+    displayBackUI();
     checkHover();
     displayMessages(messages);
     displayChoices(choicesMade);
@@ -140,27 +175,53 @@ function draw() {
 
 function instantiateChoices() { // create a list of possible choices, where 3 are displayed at a time
   choices = [
-    newChoice("add a circle", 0, 1.2, 1, function A0() {ellipse(canvasWidth/2, canvasHeight/2+70, 100);}),
-    newChoice("add a square", 1, 1.05, 1, function A1() {rect(canvasWidth/2-50, canvasHeight/2+20, 100, 100);}),    
-    newChoice("add a triangle", 2, 1.3, 1, function A2() {myTriangle(canvasWidth/2, canvasHeight/2+70, 100);}),    
-    newChoice("make the shape blue", 0, 1.2, 0, function B0() {fill(0, 0, 255);}),
-    newChoice("make the shape green", 1, 1.1, 0, function B1() {fill(0, 255, 0);}),    
-    newChoice("make the shape red", 2, 0.9, 0, function B2() {fill(255, 0, 0);}),
-    newChoice("add a circle", 0, 1.5, 1, function C0() {ellipse(canvasWidth/2, canvasHeight/2+70, 100);}),
-    newChoice("add a square", 1, 1.05, 1, function C1() {rect(canvasWidth/2-50, canvasHeight/2+20, 100, 100);}),    
-    newChoice("add a triangle", 2, 0.5, 1, function C2() {myTriangle(canvasWidth/2, canvasHeight/2+70, 100);}),    
-    newChoice("add a circle", 0, 1.5, 1, function D0() {ellipse(canvasWidth/2, canvasHeight/2+70, 100);}),
-    newChoice("add a square", 1, 1.05, 1, function D1() {rect(canvasWidth/2-50, canvasHeight/2+20, 100, 100);}),    
-    newChoice("add a triangle", 2, 0.5, 1, function D2() {myTriangle(canvasWidth/2, canvasHeight/2+70, 100);}),    
-    newChoice("add a circle", 0, 1.5, 1, function E0() {ellipse(canvasWidth/2, canvasHeight/2+70, 100);}),
-    newChoice("add a square", 1, 1.05, 1, function E1() {rect(canvasWidth/2-50, canvasHeight/2+20, 100, 100);}),    
-    newChoice("add a triangle", 2, 0.5, 1, function E2() {myTriangle(canvasWidth/2, canvasHeight/2+70, 100);}),
-    newChoice("add a circle", 0, 1.5, 1, function F0() {ellipse(canvasWidth/2, canvasHeight/2+70, 100);}),
-    newChoice("add a square", 1, 1.05, 1, function F1() {rect(canvasWidth/2-50, canvasHeight/2+20, 100, 100);}),    
-    newChoice("add a triangle", 2, 0.5, 1, function F2() {myTriangle(canvasWidth/2, canvasHeight/2+70, 100);}),    
-    newChoice("add a circle", 0, 1.5, 1, function G0() {ellipse(canvasWidth/2, canvasHeight/2+70, 100);}),
-    newChoice("add a square", 1, 1.05, 1, function G1() {rect(canvasWidth/2-50, canvasHeight/2+20, 100, 100);}),    
-    newChoice("add a triangle", 2, 0.5, 1, function G2() {myTriangle(canvasWidth/2, canvasHeight/2+70, 100);})     
+    newChoice("keep the background \nblack", 0, 1.3, 0, function A0() {backgroundType = 1;}),
+    newChoice("set a white background", 1, 1.2, 0, function A1() {backgroundType = 2;}),
+    newChoice("set a gray background", 2, 1.05, 0, function A2() {backgroundType = 3;}),
+
+    newChoice("add a circle", 0, 1.1, 0, function B0() {shapeType = 1;}),
+    newChoice("add a square", 1, 0.95, 0, function B1() {shapeType = 2;}),   
+    newChoice("add a triangle", 2, 1.5, 0, function B2() {shapeType = 3;}),
+
+    newChoice("make the shape red", 0, 1.2, 0, function C0() {colorType = 1;}),
+    newChoice("make the shape green", 1, 1.1, 0, function C1() {colorType = 2;}),    
+    newChoice("make the shape blue", 2, 0.9, 0, function C2() {colorType = 3;}), 
+
+    newChoice("scatter the shapes", 0, 0.7, 0, function D0() {movementType = 1;}),
+    newChoice("move shapes in a path", 1, 1.1, 0, function D1() {movementType = 2;}),    
+    newChoice("make shapes bounce", 2, 0.9, 0, function D2() {movementType = 3;}),
+
+    newChoice("keep the colours \nthe same", 0, 0.8, 0, function E0() {colorShiftType = 1;}),
+    newChoice("add a saturation \ncycle", 1, 1.1, 0, function E1() {colorShiftType = 2;}),
+    newChoice("add a hue cycle", 2, 1.4, 0, function E2() {colorShiftType = 3;}),
+
+    newChoice("keep the speed \nthe same", 0, 1.05, 0, function F0() {speedType = 1;}),
+    newChoice("make the speed \nslower", 1, 0.6, 0, function F1() {speedType = 2;}),    
+    newChoice("make the speed \nfaster", 2, 1.1, 0, function F2() {speedType = 3;}),
+
+    newChoice("make the shape \nlarger", 0, 1.6, 0, function G0() {sizeType = 1;}),
+    newChoice("make the shape \nsmaller", 1, 1.2, 0, function G1() {sizeType = 2;}),
+    newChoice("scale the shape \nrandomly", 2, 0.4, 0, function G2() {sizeType = 3;}),
+
+    newChoice("keep a medium fade", 0, 1.1, 0, function H0() {fadeType = 1;}),
+    newChoice("make the fade slower", 1, 1.7, 0, function H1() {fadeType = 2;}),
+    newChoice("make the fade faster", 2, 0.3, 0, function H2() {fadeType = 3;}),
+
+    newChoice("keep the effect the\n same", 0, 1.2, 0, function I0() {outlineType = 1;}),
+    newChoice("add a outline effect", 1, 0.8, 0, function I1() {outlineType = 2;}),
+    newChoice("add a thick outline \neffect", 2, 1.5, 0, function I2() {outlineType = 3;}),
+
+    newChoice("keep the effect the \nsame", 0, 0.6, 0, function J0() {transType = 1;}),
+    newChoice("add subtle transparency", 1, 1.8, 0, function J1() {transType = 2;}),
+    newChoice("add strong transparency", 2, 1.3, 0, function J2() {transType = 3;})
+  ]
+
+  choicesLoop = [    
+    newChoice("keep things the \nsame", 0, 1, 1, function S() {}),
+    newChoice("add more circles", 0, 1.1, 1, function L0() {fill(255, 10);ellipse(random(10, canvasWidth-10), random(80, canvasHeight-10), 25);}),
+    newChoice("add more squares", 0, 0.95, 1, function L1() {fill(255, 10);rect(random(10, canvasWidth-10), random(80, canvasHeight-10), 25, 25);}),   
+    newChoice("add more triangles", 0, 0.8, 1, function L2() {fill(255, 10);myTriangle(random(10, canvasWidth-10), random(80, canvasHeight-10), 25);}), 
+    newChoice("kick a member of \nchat", -1, 0.5, 1, function L3() {addMessage(newMessage("", "User @"+generateName()+" has been kicked from the chat", 1));})
   ]
 }
 
@@ -442,13 +503,15 @@ function instantiateChatMessages() { // create lists of different chat messages
     newMessage(users.pretentious.name, "This encapsulates the sublime effortlessly", 4),
     newMessage(users.pretentious.name, "They're using Javascript?? Why?", 4),
     newMessage(users.pretentious.name, "Surprised @"+playerName+" is using p5.js", 4),
+    newMessage(users.pretentious.name, "I wonder if this will be in an exhibition", 4),
     newMessage(users.critic.name, "I have yet to be impressed", 4),
     newMessage(users.critic.name, "I will be giving this a 7/10, read my review online", 4),
     newMessage(users.complementer.name, "I think @"+playerName+" is an genuis", 4),
     newMessage(users.complementer.name, "@"+playerName+" is a true modern artist", 4),
-    newMessage(users.complementer.name, "If you haven't heard of Tim James, he is amazing", 4), // :)
+    newMessage(users.complementer.name, "Tim James is an amazing programmer", 4), // :)
     newMessage(users.edgy.name, "I find the essential unreality of meaning interesting", 4),
     newMessage(users.edgy.name, "There is an inner darkness in this", 4),
+    newMessage(users.edgy.name, "This place is as toxic as twitch chat", 4),
     newMessage(users.edgy.name, "Who is making the choices?", 4),
     newMessage(users.edgy.name, "Its like the Stanley Parable", 4), // easter egg
     newMessage(users.edgy.name, "This website has really bad design...", 4),
@@ -497,7 +560,6 @@ function generateNextMsg() { // decide what message to add to chat, based on cur
 
   // respond to input from the user
   if (randomValue < chatStatus.playerMsgResponse) { 
-    console.log("Total: "+totalValues+"\nRandom Value: "+randomValue+ "\nGot: playerMsgResponse");
     generatePlayerMsgResponse();
 
     // decay chance
@@ -511,7 +573,6 @@ function generateNextMsg() { // decide what message to add to chat, based on cur
   }
   // respond to choices from the user
   else if (randomValue < chatStatus.playerMsgResponse + chatStatus.choiceResponse) {
-    console.log("Total: "+totalValues+"\nRandom Value: "+randomValue+ "\nGot: choiceResponse");
     generateChoiceResponse();
 
     // decay chance
@@ -526,7 +587,6 @@ function generateNextMsg() { // decide what message to add to chat, based on cur
   // greeting on startup
   else if (randomValue < chatStatus.playerMsgResponse + 
     chatStatus.choiceResponse + chatStatus.greeting) {
-    console.log("Total: "+totalValues+"\nRandom Value: "+randomValue+ "\nGot: greeting");
     generateGreetingMsg();
 
     // decay chance
@@ -543,18 +603,15 @@ function generateNextMsg() { // decide what message to add to chat, based on cur
   // waiting if no choices are made for a while
   else if (randomValue < chatStatus.playerMsgResponse + chatStatus.choiceResponse + 
     chatStatus.greeting + chatStatus.waiting) { 
-      console.log("Total: "+totalValues+"\nRandom Value: "+randomValue+ "\nGot: waiting");
       generateWaitingMsg();
   }
   // make comments on the current choice
   else if (randomValue < chatStatus.playerMsgResponse + chatStatus.choiceResponse + 
     chatStatus.greeting + chatStatus.waiting + chatStatus.nextChoice) { 
-      console.log("Total: "+totalValues+"\nRandom Value: "+randomValue+ "\nGot: nextChoice");
       generateNextChoiceMsg();
   }
   // revert to idle messages if no other options are made
-  else { 
-    console.log("Total: "+totalValues+"\nRandom Value: "+randomValue+ "\nGot: idle");
+  else {
     generateIdleMsg();
   }
 }
@@ -904,10 +961,24 @@ function generatePlayerMsgResponse() { // randomly generate a message commenting
   }
 }
 
-function generateNextChoiceMsg() {// randomly generate a message about the next choice
-  let r;
-  let rC = choicesMade*3 + Math.round(random(0,2));
-  let c = choices[rC];  
+function generateNextChoiceMsg() { // randomly generate a message about the next choice
+  let r, rC, c;
+  if (isChoiceLooping) {    
+    rC = Math.round(random(0,2));
+    if (rC == 0)
+      c = loopChoiceA;
+    else if (rC == 1)
+      c = loopChoiceB;
+    else
+      c = loopChoiceC;
+    
+    if (c.id == -1)
+      c = loopChoiceA;
+  }
+  else {
+    rC = choicesMade*3 + Math.round(random(0,2));
+    c = choices[rC];
+  }
   if (viewers > initialViewers*1.5) { // happy
     if (c.vFactor > 1) { // pro
       r = Math.round(random(0, 14));
@@ -1528,6 +1599,23 @@ function getSecondsSinceChoice() { // gets the time elapsed since a choice has b
   return getSecondsElapsed() - timeOfLastChoice;
 }
 
+function generateLoopingChoices() { // generates a set of random choices
+  let r1, r2, r3;
+  // ensure choices are not the same
+  r1 = 0;
+  loopChoiceA = choicesLoop[r1];
+  r2 = Math.round(random(0, choicesLoop.length - 1));
+  while (r2 == r1 || r2 == prevLCB)
+    r2 = Math.round(random(0, choicesLoop.length - 1));
+  loopChoiceB = choicesLoop[r2];
+  r3 = Math.round(random(0, choicesLoop.length - 1));  
+  while (r3 == r2 || r3 == r1 || r3 == prevLCC)
+    r3 = Math.round(random(0, choicesLoop.length - 1));
+  loopChoiceC = choicesLoop[r3];
+  prevLCB = r2;
+  prevLCC = r3;
+}
+
 /*
  Object Functions
 */
@@ -1562,7 +1650,6 @@ function makeChoice(n, id) { //* trigger events from making a choice,
   else    
     prevBestChoice = choices[n*3+2];
 
-  console.log(prevBestChoice);
   timeOfLastChoice = getSecondsElapsed();
 
   canvasFunctions.push(choices[i]);
@@ -1574,6 +1661,44 @@ function makeChoice(n, id) { //* trigger events from making a choice,
   triggerEvent(function c() {chatStatus.choiceResponse = 200;});
 
   return choices[i];
+}
+
+function makeLoopingChoice(id) { // makes a loopable choice
+  let c;
+  if (id == 1)
+    c = loopChoiceA;
+  else if (id == 2)
+    c = loopChoiceB;
+  else
+    c = loopChoiceC;
+
+  choicesMade++;
+  if (c.id == -1)
+    prevChoice = newChoice("do that", 0, 1, 0, function Z() {});
+  else
+    prevChoice = c;
+
+  // set the prev best choice as the choice with the max value
+  let max = Math.max(loopChoiceA.vFactor, loopChoiceB.vFactor, loopChoiceC.vFactor);
+  if (max == loopChoiceA.vFactor)
+    prevBestChoice = loopChoiceA;
+  else if (max == loopChoiceB.vFactor)
+    prevBestChoice = loopChoiceB;
+  else    
+    prevBestChoice = loopChoiceC;
+
+  timeOfLastChoice = getSecondsElapsed();
+
+  canvasFunctions.push(c);
+  canvasFunctions.sort(compareChoices);
+
+  // calculate new viewer count
+  viewers = Math.round(viewers * c.vFactor);
+  displayedViewers = Math.round(random(0.98*viewers, 1.02*viewers));
+  triggerEvent(function c() {chatStatus.choiceResponse = 200;});
+
+  generateLoopingChoices();
+  return c;
 }
 
 function addMessage(m) { // add a message to the chat
@@ -1709,7 +1834,7 @@ function newUser(n, a) { // stores information about a user
 function newMessage(u, s, t) {  // stores information about a message
   let message = {
     user : "",
-    text : s.substring(0, 2*(chatWidth/14)-u.length),
+    text : s.replace("\n","").substring(0, 2*(chatWidth/14)-u.length),
     // the type of message determines how it is displayed.
     // general types have random variations
     // 0 - player, 1 - console, 2 - general, 3 - general w/ ?, 4 - fixed
@@ -1782,52 +1907,243 @@ function displayMessages(messages) { // displays a list of messages in the chat 
 function displayChoices(i) { // displays the current choises
   noStroke();
   textFont('Trebuchet MS');
-  textSize(30);
+  textSize(20);
   textAlign(LEFT);
   textStyle(NORMAL);
   fill(200);
 
-  // indicate which option is being hovered over
-  if (isHoveringA) {
-    text(choices[i*3+1].text[0].toUpperCase() + choices[i*3+1].text.substring(1, choices[i*3+1].text.length), ((windowWidth-chatWidth)/3)+25, windowHeight-25);
-    text(choices[i*3+2].text[0].toUpperCase() + choices[i*3+2].text.substring(1, choices[i*3+2].text.length), (2*(windowWidth-chatWidth)/3)+25, windowHeight-25);
-    fill(255);
-    text(choices[i*3].text[0].toUpperCase() + choices[i*3].text.substring(1, choices[i*3].text.length), 25, windowHeight-25);
-  }
-  else if (isHoveringB) {
-    text(choices[i*3].text[0].toUpperCase() + choices[i*3].text.substring(1, choices[i*3].text.length), 25, windowHeight-25);
-    text(choices[i*3+2].text[0].toUpperCase() + choices[i*3+2].text.substring(1, choices[i*3+2].text.length), (2*(windowWidth-chatWidth)/3)+25, windowHeight-25);
-    fill(255);
-    text(choices[i*3+1].text[0].toUpperCase() + choices[i*3+1].text.substring(1, choices[i*3+1].text.length), ((windowWidth-chatWidth)/3)+25, windowHeight-25);
+  if (isChoiceLooping) {
+    // indicate which option is being hovered over
+    if (isHoveringA) {
+      text(loopChoiceB.text[0].toUpperCase() + loopChoiceB.text.substring(1, loopChoiceB.text.length), ((windowWidth-chatWidth)/3)+10, windowHeight-40);
+      text(loopChoiceC.text[0].toUpperCase() + loopChoiceC.text.substring(1, loopChoiceC.text.length), (2*(windowWidth-chatWidth)/3)+10, windowHeight-40);
+      fill(255);
+      text(loopChoiceA.text[0].toUpperCase() + loopChoiceA.text.substring(1, loopChoiceA.text.length), 10, windowHeight-40);
+    }
+    else if (isHoveringB) {
+      text(loopChoiceA.text[0].toUpperCase() + loopChoiceA.text.substring(1, loopChoiceA.text.length), 10, windowHeight-40);
+      text(loopChoiceC.text[0].toUpperCase() + loopChoiceC.text.substring(1, loopChoiceC.text.length), (2*(windowWidth-chatWidth)/3)+10, windowHeight-40);
+      fill(255);
+      text(loopChoiceB.text[0].toUpperCase() + loopChoiceB.text.substring(1, loopChoiceB.text.length), ((windowWidth-chatWidth)/3)+10, windowHeight-40);
 
-  }
-  else if (isHoveringC) {
-    text(choices[i*3].text[0].toUpperCase() + choices[i*3].text.substring(1, choices[i*3].text.length), 25, windowHeight-25);
-    text(choices[i*3+1].text[0].toUpperCase() + choices[i*3+1].text.substring(1, choices[i*3+1].text.length), ((windowWidth-chatWidth)/3)+25, windowHeight-25);
-    fill(255);
-    text(choices[i*3+2].text[0].toUpperCase() + choices[i*3+2].text.substring(1, choices[i*3+2].text.length), (2*(windowWidth-chatWidth)/3)+25, windowHeight-25);
+    }
+    else if (isHoveringC) {
+      text(loopChoiceA.text[0].toUpperCase() + loopChoiceA.text.substring(1, loopChoiceA.text.length), 10, windowHeight-40);
+      text(loopChoiceB.text[0].toUpperCase() + loopChoiceB.text.substring(1, loopChoiceB.text.length), ((windowWidth-chatWidth)/3)+10, windowHeight-40);
+      fill(255);
+      text(loopChoiceC.text[0].toUpperCase() + loopChoiceC.text.substring(1, loopChoiceC.text.length), (2*(windowWidth-chatWidth)/3)+10, windowHeight-40);
+    }
+    else {
+      text(loopChoiceA.text[0].toUpperCase() + loopChoiceA.text.substring(1, loopChoiceA.text.length), 10, windowHeight-40);
+      text(loopChoiceB.text[0].toUpperCase() + loopChoiceB.text.substring(1, loopChoiceB.text.length), ((windowWidth-chatWidth)/3)+10, windowHeight-40);
+      text(loopChoiceC.text[0].toUpperCase() + loopChoiceC.text.substring(1, loopChoiceC.text.length), (2*(windowWidth-chatWidth)/3)+10, windowHeight-40);
+    }    
   }
   else {
-    text(choices[i*3].text[0].toUpperCase() + choices[i*3].text.substring(1, choices[i*3].text.length), 25, windowHeight-25);
-    text(choices[i*3+1].text[0].toUpperCase() + choices[i*3+1].text.substring(1, choices[i*3+1].text.length), ((windowWidth-chatWidth)/3)+25, windowHeight-25);
-    text(choices[i*3+2].text[0].toUpperCase() + choices[i*3+2].text.substring(1, choices[i*3+2].text.length), (2*(windowWidth-chatWidth)/3)+25, windowHeight-25);
+    // indicate which option is being hovered over
+    if (isHoveringA) {
+      text(choices[i*3+1].text[0].toUpperCase() + choices[i*3+1].text.substring(1, choices[i*3+1].text.length), ((windowWidth-chatWidth)/3)+10, windowHeight-40);
+      text(choices[i*3+2].text[0].toUpperCase() + choices[i*3+2].text.substring(1, choices[i*3+2].text.length), (2*(windowWidth-chatWidth)/3)+10, windowHeight-40);
+      fill(255);
+      text(choices[i*3].text[0].toUpperCase() + choices[i*3].text.substring(1, choices[i*3].text.length), 10, windowHeight-40);
+    }
+    else if (isHoveringB) {
+      text(choices[i*3].text[0].toUpperCase() + choices[i*3].text.substring(1, choices[i*3].text.length), 10, windowHeight-40);
+      text(choices[i*3+2].text[0].toUpperCase() + choices[i*3+2].text.substring(1, choices[i*3+2].text.length), (2*(windowWidth-chatWidth)/3)+10, windowHeight-40);
+      fill(255);
+      text(choices[i*3+1].text[0].toUpperCase() + choices[i*3+1].text.substring(1, choices[i*3+1].text.length), ((windowWidth-chatWidth)/3)+10, windowHeight-40);
+
+    }
+    else if (isHoveringC) {
+      text(choices[i*3].text[0].toUpperCase() + choices[i*3].text.substring(1, choices[i*3].text.length), 10, windowHeight-40);
+      text(choices[i*3+1].text[0].toUpperCase() + choices[i*3+1].text.substring(1, choices[i*3+1].text.length), ((windowWidth-chatWidth)/3)+10, windowHeight-40);
+      fill(255);
+      text(choices[i*3+2].text[0].toUpperCase() + choices[i*3+2].text.substring(1, choices[i*3+2].text.length), (2*(windowWidth-chatWidth)/3)+10, windowHeight-40);
+    }
+    else {
+      text(choices[i*3].text[0].toUpperCase() + choices[i*3].text.substring(1, choices[i*3].text.length), 10, windowHeight-40);
+      text(choices[i*3+1].text[0].toUpperCase() + choices[i*3+1].text.substring(1, choices[i*3+1].text.length), ((windowWidth-chatWidth)/3)+10, windowHeight-40);
+      text(choices[i*3+2].text[0].toUpperCase() + choices[i*3+2].text.substring(1, choices[i*3+2].text.length), (2*(windowWidth-chatWidth)/3)+10, windowHeight-40);
+    }
   }
 }
 
 function displayCanvas(f) { // run functions that create the canvas
   canvasWidth = windowWidth - chatWidth;
   canvasHeight = windowHeight - 140;
-  fill(255);
   for (i = 0; i < f.length; i++) {
-    f[i].function();
+    if (f[i].id < 0) { // only run special choice functions once
+      f[i].function();
+      f.splice(i, 1);
+    }
+    else
+      f[i].function();
   }
+
+  let fade;
+  if (fadeType == 2)                // slower fade
+    fade = 5;
+  else if (fadeType == 3)           // faster fade
+    fade = 50;
+  else                              // medium fade
+    fade = 20;
+
+  if (backgroundType == 2)          // white background
+    fill(200, fade);
+  else if (backgroundType == 3)     // gray background
+    fill(50, fade);
+  else                              // black background
+    fill(0, fade);  
+  rect(0, 70, canvasWidth, canvasHeight);    
+
+  let spd;
+  if (speedType == 2)                 // slow
+    spd = 4;
+  else if (speedType == 3)            // fast
+    spd = 1;
+  else                                // medium
+    spd = 2;
+
+  if (frameCount%spd == 0) {
+    let shapeOpacity;
+    if (transType == 2)               // subtle transparency
+      shapeOpacity = 100;
+    else if (transType == 3)          // strong transparency
+      shapeOpacity = 30;
+    else                              // no transparency
+      shapeOpacity = 255;
+
+    if (colorShiftType == 2) {        // saturation sine color cycle
+      if (colorType == 1) 
+        hue = 0;
+      else if (colorType == 2)
+        hue = 100;
+      else
+        hue = 230;
+      saturation = Math.abs(sin(frameCount/80))*360;
+      colorMode(HSB, 360);
+      fill(hue, saturation, 300, shapeOpacity);    
+      colorMode(RGB, 255);
+    }
+    else if (colorShiftType == 3) {    // hue sine color cycle
+      hue = Math.abs(sin(frameCount/130))*360;
+      saturation = 300;
+      colorMode(HSB, 360);
+      fill(hue, saturation, 300, shapeOpacity);  
+      colorMode(RGB, 255);
+    }
+    else {                            // unassigned
+      if (colorType == 1) {           // red        
+        shapeColorR = 255;
+        shapeColorG = 0;
+        shapeColorB = 0;
+      }
+      else if (colorType == 2) {       // green
+        shapeColorR = 0;
+        shapeColorG = 255;
+        shapeColorB = 0;
+      }
+      else if (colorType == 3) {       // blue
+        shapeColorR = 0;
+        shapeColorG = 0;
+        shapeColorB = 255;
+      }
+      else {                           // unassigned
+        if (backgroundType == 2) {
+          shapeColorR = 0;
+          shapeColorG = 0;
+          shapeColorB = 0;
+        }
+        else {
+          shapeColorR = 255;
+          shapeColorG = 255;
+          shapeColorB = 255;
+        }
+      }
+      colorMode(RGB, 255);
+      fill(shapeColorR, shapeColorG, shapeColorB, shapeOpacity);
+    }
+
+    let shapeSize = 100;
+    if (sizeType == 1)              // large
+      shapeSize = 150;
+    else if (sizeType == 2)         // small
+      shapeSize = 50;
+    else if (sizeType == 3)         // random
+      shapeSize = random(50,150);  
+
+    if (movementType == 1) {        // scatter
+      nextPosX = random(shapeSize/2, canvasWidth-shapeSize/2);
+      nextPosY = random(70+shapeSize/2, canvasHeight);
+    }
+    else if (movementType == 2) {   // path
+      nextPosX = (nextPosX+10)%(canvasWidth-shapeSize/2);
+      nextPosY = random(70+shapeSize/2, canvasHeight);
+    }
+    else if (movementType == 3) {   // bounce
+      nextPosX += xDir;
+      if (nextPosX < shapeSize/2) {      
+        xDir = random(5, 10);
+        nextPosX += 2*(xDir);
+      }
+      else if (nextPosX > canvasWidth - shapeSize/2){      
+        xDir = random(-5, -10);
+        nextPosX += 2*(xDir);
+      }
+
+      nextPosY += yDir;
+      if (nextPosY < 70 + shapeSize/2) {      
+        yDir = random(5, 10);
+        nextPosY += 2*(yDir);
+      }
+      else if (nextPosY > canvasHeight + 70 - shapeSize/2){      
+        yDir = random(-5, -10);
+        nextPosY += 2*(yDir);
+      }
+    }
+    else {                          // unassigned
+      nextPosX = canvasWidth/2;
+      nextPosY = canvasHeight/2+70;    
+    }
+
+    if (outlineType == 2) {          // outline
+      stroke(0);    
+      strokeWeight(1);
+    }
+    else if (outlineType == 3) {    // thick outline
+      stroke(0);
+      strokeWeight(3);
+    }
+    else                            // no outline
+      noStroke();
+    
+    if (shapeType == 1)             // circle
+      ellipse(nextPosX, nextPosY, shapeSize);
+    else if (shapeType == 2) {      // square
+      let shapeSize2 = shapeSize;
+      if (sizeType == 3)
+        shapeSize2 = random(50,150);
+      rect(nextPosX-50, nextPosY-50, shapeSize, shapeSize2);
+    }
+    else if (shapeType == 3) {      // triangle
+      if (movementType != 0 && movementType != 3) {
+        if (Math.random() >= 0.5)        
+          myTriangle(nextPosX, nextPosY, shapeSize);
+        else
+          myTriangleFlipped(nextPosX, nextPosY, shapeSize);
+      }
+      else
+        myTriangle(nextPosX, nextPosY, shapeSize);
+    }
+  }  
+
+  // reset
+  noStroke();
+  strokeWeight(1);
 }
 
 function displayBackUI() { // display the back layer of UI
-  fill(0);
-  rect(0, 0, windowWidth, windowHeight);
-
-  fill(25, 100);
+  fill(15, 200);
   stroke(100);
   rect(windowWidth-chatWidth, 0, windowWidth, windowHeight);
   rect(0, 0, windowWidth-chatWidth, 70);
@@ -1880,6 +2196,11 @@ function displayFrontUI() { // display the front layer of UI
 function myTriangle(x, y, s) { // create a triangle with side length s and centered at (x,y)
   let h = Math.sqrt((s*s) - ((s/2) * (s/2)));
   triangle(x - s/2, y + h/2, x + s/2, y + h/2, x, y - h/2);
+}
+
+function myTriangleFlipped(x, y, s) { // create a triangle with side length s and centered at (x,y)
+  let h = Math.sqrt((s*s) - ((s/2) * (s/2)));
+  triangle(x - s/2, y - h/2, x + s/2, y - h/2, x, y + h/2);
 }
 
 /*
@@ -1938,13 +2259,22 @@ function keyPressed() { // handle keyboard input
 
 function mousePressed() { // handle clicking on choices
   if (isHoveringA) {
-    makeChoice(choicesMade, 0);
+    if (isChoiceLooping)
+      makeLoopingChoice(1);
+    else
+      makeChoice(choicesMade, 0);
   }
   else if (isHoveringB) {
-    makeChoice(choicesMade, 1);
+    if (isChoiceLooping)
+      makeLoopingChoice(2);
+    else
+      makeChoice(choicesMade, 1);
   }
   else if (isHoveringC) {
-    makeChoice(choicesMade, 2);
+    if (isChoiceLooping)
+      makeLoopingChoice(3);
+    else
+      makeChoice(choicesMade, 2);
   }
 }
 
