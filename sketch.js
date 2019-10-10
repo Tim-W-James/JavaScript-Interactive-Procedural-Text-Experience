@@ -6,7 +6,7 @@
 // variable declaration
 let input, button, player, users, viewers, displayedViewers;
 let canvasWidth, canvasHeight, chatStatus, initialTime;
-let greetingMsg, nextChoiceMsg;
+let greetingMsg, choiceResponseMsg, idleChoiceMsg;
 let names, adjectives, nouns;
 let playerName = "You";
 let lastUser = "";
@@ -16,6 +16,7 @@ let eventStatus = 0; // 0 - not active, 1 - preparing, 2 - responding
 let chatWidth = 500;
 let choicesMade = 0;
 let prevChoice = -1;
+let prevBestChoice = -1;
 let timeOfLastChoice = 0;
 let minMsgDelay = 75;
 let maxMsgDelay = 100;
@@ -103,7 +104,7 @@ function draw() {
       generateNextMsg();
 
     // after time has elapsed since a choice, add waiting messages to chat
-    if (getSecondsSinceChoice() > 30)
+    if (getSecondsSinceChoice() > 45)
       chatStatus.waiting = 10;      
     else
       chatStatus.waiting = 0;
@@ -144,10 +145,22 @@ function instantiateChoices() { // create a list of possible choices, where 3 ar
     newChoice("add a triangle", 2, 1.3, 1, function A2() {myTriangle(canvasWidth/2, canvasHeight/2+70, 100);}),    
     newChoice("make the shape blue", 0, 1.2, 0, function B0() {fill(0, 0, 255);}),
     newChoice("make the shape green", 1, 1.1, 0, function B1() {fill(0, 255, 0);}),    
-    newChoice("make the shape red", 2, 0.9, 0, function B2() {fill(255, 0, 0);})    ,
-    newChoice("", 0, 0, 0, function C0() {}),
-    newChoice("", 1, 0, 0, function C1() {}),    
-    newChoice("", 2, 0, 0, function C2() {})
+    newChoice("make the shape red", 2, 0.9, 0, function B2() {fill(255, 0, 0);}),
+    newChoice("add a circle", 0, 1.5, 1, function C0() {ellipse(canvasWidth/2, canvasHeight/2+70, 100);}),
+    newChoice("add a square", 1, 1.05, 1, function C1() {rect(canvasWidth/2-50, canvasHeight/2+20, 100, 100);}),    
+    newChoice("add a triangle", 2, 0.5, 1, function C2() {myTriangle(canvasWidth/2, canvasHeight/2+70, 100);}),    
+    newChoice("add a circle", 0, 1.5, 1, function D0() {ellipse(canvasWidth/2, canvasHeight/2+70, 100);}),
+    newChoice("add a square", 1, 1.05, 1, function D1() {rect(canvasWidth/2-50, canvasHeight/2+20, 100, 100);}),    
+    newChoice("add a triangle", 2, 0.5, 1, function D2() {myTriangle(canvasWidth/2, canvasHeight/2+70, 100);}),    
+    newChoice("add a circle", 0, 1.5, 1, function E0() {ellipse(canvasWidth/2, canvasHeight/2+70, 100);}),
+    newChoice("add a square", 1, 1.05, 1, function E1() {rect(canvasWidth/2-50, canvasHeight/2+20, 100, 100);}),    
+    newChoice("add a triangle", 2, 0.5, 1, function E2() {myTriangle(canvasWidth/2, canvasHeight/2+70, 100);}),
+    newChoice("add a circle", 0, 1.5, 1, function F0() {ellipse(canvasWidth/2, canvasHeight/2+70, 100);}),
+    newChoice("add a square", 1, 1.05, 1, function F1() {rect(canvasWidth/2-50, canvasHeight/2+20, 100, 100);}),    
+    newChoice("add a triangle", 2, 0.5, 1, function F2() {myTriangle(canvasWidth/2, canvasHeight/2+70, 100);}),    
+    newChoice("add a circle", 0, 1.5, 1, function G0() {ellipse(canvasWidth/2, canvasHeight/2+70, 100);}),
+    newChoice("add a square", 1, 1.05, 1, function G1() {rect(canvasWidth/2-50, canvasHeight/2+20, 100, 100);}),    
+    newChoice("add a triangle", 2, 0.5, 1, function G2() {myTriangle(canvasWidth/2, canvasHeight/2+70, 100);})     
   ]
 }
 
@@ -370,12 +383,24 @@ function instantiateUsers() { // create a list of all identified users
     "Cobweb"
 
   ];
-  users = {
-    complementer : newUser(generateSName(0, true, true, false), true),
-    pretentious : newUser(generateSName(1, false, false, false), true),
-    critic : newUser(generateSName(0, true, false, false), true),
-    edgy : newUser(generateSName(2, false, false, true), true)
-  };
+
+  // assign names and status to users
+  if (Math.random() >= 0.5) { // hi lecturers :)
+    users = {
+      complementer : newUser("Ben_Swift", true),
+      pretentious : newUser(generateSName(1, false, false, false), true),
+      critic : newUser("Tony_Curran", true),
+      edgy : newUser(generateSName(2, false, false, true), true)
+    };
+  }
+  else {
+    users = {
+      complementer : newUser("Tony_Curran", true),
+      pretentious : newUser(generateSName(1, false, false, false), true),
+      critic : newUser("Ben_Swift", true),
+      edgy : newUser(generateSName(2, false, false, true), true)
+    };
+  }
 }
 
 function instantiateChatStatus() { // create a list of chat status properties
@@ -401,6 +426,43 @@ function instantiateChatMessages() { // create lists of different chat messages
     newMessage(users.edgy.name, "Meh live art sessions aren't really my thing", 4),    
     newMessage(users.pretentious.name, "I wonder if @"+playerName+" will be any good", 4)
   ];
+  choiceResponseMsg = [
+    newMessage(users.critic.name, "An interesting decision", 4),
+    newMessage(users.pretentious.name, "A unique process on display here", 4),
+    newMessage(users.complementer.name, "I like where @"+playerName+" is taking this", 4),
+    newMessage(users.edgy.name, "Honestly just make the colors darker", 4)
+  ];
+  idleMsg = [
+    newMessage(users.critic.name, "Is @"+playerName+" even an artist?", 4),
+    newMessage(users.critic.name, "I wonder how I should rate this experience...", 4),
+    newMessage(users.critic.name, "I think this deserves the highest possible rating", 4),
+    newMessage(users.complementer.name, "As a university lecturer, I'm quite impressed", 4),
+    newMessage(users.complementer.name, "I heard this guy got a degree at ANU", 4),
+    newMessage(users.pretentious.name, "Maybe incorporate some Daniel Mullins influence?", 4), // easter egg: developer of 'The Hex' and 'Pony Island'
+    newMessage(users.pretentious.name, "This encapsulates the sublime effortlessly", 4),
+    newMessage(users.pretentious.name, "They're using Javascript?? Why?", 4),
+    newMessage(users.pretentious.name, "Surprised @"+playerName+" is using p5.js", 4),
+    newMessage(users.critic.name, "I have yet to be impressed", 4),
+    newMessage(users.critic.name, "I will be giving this a 7/10, read my review online", 4),
+    newMessage(users.complementer.name, "I think @"+playerName+" is an genuis", 4),
+    newMessage(users.complementer.name, "@"+playerName+" is a true modern artist", 4),
+    newMessage(users.complementer.name, "If you haven't heard of Tim James, he is amazing", 4), // :)
+    newMessage(users.edgy.name, "I find the essential unreality of meaning interesting", 4),
+    newMessage(users.edgy.name, "There is an inner darkness in this", 4),
+    newMessage(users.edgy.name, "Who is making the choices?", 4),
+    newMessage(users.edgy.name, "Its like the Stanley Parable", 4), // easter egg
+    newMessage(users.edgy.name, "This website has really bad design...", 4),
+    newMessage(users.edgy.name, "Who wrote the code for this? Long messages are not processed well at all!!!", 4),
+    newMessage(users.edgy.name, "It feels like @"+playerName+" has limited choices", 4),
+    newMessage(users.edgy.name, "IS ANYONE HERE REAL?!", 4),
+    newMessage(users.edgy.name, "I THINK THIS IS ALL FAKE!", 4),
+    newMessage(users.edgy.name, "IS THIS EVEN LIVE?!", 4),
+    newMessage(users.edgy.name, "HOW DO I GET OUT OF HERE???", 4),
+    newMessage(users.pretentious.name, "I'm sensing some Davey Wreden influence in this", 4), // easter egg: developer of 'The Beginners Guide' and 'The Stanley Parable'
+    newMessage(users.pretentious.name, "Is thier name really @"+playerName+"?", 4),
+    newMessage(users.pretentious.name, "Reminds me of Kyle Seeley's work.", 4), // easter egg: developer of 'Emily is Away'
+    newMessage(users.pretentious.name, "Maybe incorporate some Daniel Mullins influence?", 4) // easter egg: developer of 'The Hex' and 'Pony Island'
+  ];
 }
 
 function startStreaming() { // setup in preparation for streaming
@@ -413,7 +475,15 @@ function startStreaming() { // setup in preparation for streaming
   initialTime = new Date();
   instantiateChatMessages();
   addMessage(newMessage("", "Live Chat has Started", 1));
-  addMessage(newMessage(generateName(), "Hello!", 4));
+
+  if (Math.random() >= 0.5) { // hi tutors :)
+    addMessage(newMessage("Harrison_Shoebridge", "Hello!", 4));
+    addMessage(newMessage("Rohan_Proctor", "Hi @"+playerName, 4));
+  }
+  else {
+    addMessage(newMessage("Rohan_Proctor", "Hello!", 4));
+    addMessage(newMessage("Harrison_Shoebridge", "Hi @"+playerName, 4));
+  }
 }
 
 /*
@@ -558,226 +628,253 @@ function generateGreetingMsg() { // randomly generate a greeting
 
 function generateIdleMsg() { // randomly generate an idle message
   let r;
-  if (viewers > initialViewers*1.5) { // happy
-    r = Math.round(random(0, 18));
+  if (idleMsg.length != 0 && (Math.random() >= 0.5)) {
+    r = Math.round(random(0, idleMsg.length - 1));
+    addMessage(idleMsg[r]);
+    idleMsg.splice(r, 1);
+  }
+  else if (Math.random() >= 0.85) { // artistic nonesense
+    r = Math.round(random(0, 4));
     switch(r) {
       case 0:
-        addMessage(newMessage(generateName(), "Interested to see what happens next", 4));
+        addMessage(newMessage(generateName(), "A fascinating display of traditional ideology", 4));
         break;
       case 1:
-        addMessage(newMessage(generateName(), "This is looking great", 2));
+        addMessage(newMessage(generateName(), "This is a testament to the inaccuracies of our era", 4));
         break;
       case 2:
-        addMessage(newMessage(generateName(), "Very nice", 2));
+        addMessage(newMessage(generateName(), "Gives a clue to the darkness of our future", 4));
         break;
       case 3:
-        addMessage(newMessage(generateName(), "Impressive", 2));
-        break;        
-      case 4:
-        addMessage(newMessage(generateName(), "Very nice", 2));
-        break;        
-      case 5:
-        addMessage(newMessage(generateName(), "Wish I had this kind of talent", 2));
-        break;        
-      case 6:
-        addMessage(newMessage(generateName(), "Really cool", 2));
+        addMessage(newMessage(generateName(), "Creates synergies from traditional and modern layers", 4));
         break;
-      case 7:
-        addMessage(newMessage(generateName(), "Unique", 2));
+      default:
+        addMessage(newMessage(generateName(), "This gives a sense of nihilism and inevitability", 4));
         break;
-      case 8:
-        addMessage(newMessage(generateName(), "Really says something about the world", 2));
-        break;
-      case 9:
-        addMessage(newMessage(generateName(), "Very nice", 2));
-        break;
-      case 10:
-        addMessage(newMessage(generateName(), "A true artist", 2));
-        break;
-      case 11:
-        addMessage(newMessage(generateName(), "@"+playerName+" is a genuis", 2));
-        break;
-      case 12:
-        addMessage(newMessage(generateName(), "@"+playerName+" has talent", 2));
-        break;
-      case 13:
-        addMessage(newMessage(generateName(), "I would actually pay money for this", 2));
-        break;
-      case 14:
+    }
+  }
+  else {
+    if (viewers > initialViewers*1.5) { // happy
+      r = Math.round(random(0, 18));
+      switch(r) {
+        case 0:
+          addMessage(newMessage(generateName(), "Interested to see what happens next", 4));
+          break;
+        case 1:
+          addMessage(newMessage(generateName(), "This is looking great", 2));
+          break;
+        case 2:
+          addMessage(newMessage(generateName(), "Very nice", 2));
+          break;
+        case 3:
+          addMessage(newMessage(generateName(), "Impressive", 2));
+          break;        
+        case 4:
+          addMessage(newMessage(generateName(), "Very nice", 2));
+          break;        
+        case 5:
+          addMessage(newMessage(generateName(), "Wish I had this kind of talent", 2));
+          break;        
+        case 6:
+          addMessage(newMessage(generateName(), "Really cool", 2));
+          break;
+        case 7:
+          addMessage(newMessage(generateName(), "Unique", 2));
+          break;
+        case 8:
+          addMessage(newMessage(generateName(), "Really says something about the world", 2));
+          break;
+        case 9:
+          addMessage(newMessage(generateName(), "Very nice", 2));
+          break;
+        case 10:
+          addMessage(newMessage(generateName(), "A true artist", 2));
+          break;
+        case 11:
+          addMessage(newMessage(generateName(), "@"+playerName+" is a genuis", 2));
+          break;
+        case 12:
+          addMessage(newMessage(generateName(), "@"+playerName+" has talent", 2));
+          break;
+        case 13:
+          addMessage(newMessage(generateName(), "I would actually pay money for this", 2));
+          break;
+        case 14:
+            if (Math.random() >= 0.5)
+              addMessage(newMessage(generateName(), "I'll be right back, hope I don't miss anything", 2));
+            else if (Math.random() >= 0.5)
+              addMessage(newMessage(generateName(), "Be Right Back", 2));
+            else if (Math.random() >= 0.5)
+              addMessage(newMessage(generateName(), "Gonna head off", 2));
+            else
+              addMessage(newMessage(generateName(), "brb", 2));          
+          break;
+        case 15:
           if (Math.random() >= 0.5)
-            addMessage(newMessage(generateName(), "I'll be right back, hope I don't miss anything", 2));
+            addMessage(newMessage(generateName(), "Hey its @"+lastUser, 3));
           else if (Math.random() >= 0.5)
-            addMessage(newMessage(generateName(), "Be Right Back", 2));
-          else if (Math.random() >= 0.5)
-            addMessage(newMessage(generateName(), "Gonna head off", 2));
+            addMessage(newMessage(generateName(), "I agree @"+lastUser, 2));
           else
-            addMessage(newMessage(generateName(), "brb", 2));          
-        break;
-      case 15:
-        if (Math.random() >= 0.5)
-          addMessage(newMessage(generateName(), "Hey its @"+lastUser, 3));
-        else if (Math.random() >= 0.5)
-          addMessage(newMessage(generateName(), "I agree @"+lastUser, 2));
-        else
-          addMessage(newMessage(generateName(), "For sure @"+lastUser, 3));
-        break;      
-      case 16:
+            addMessage(newMessage(generateName(), "For sure @"+lastUser, 3));
+          break;      
+        case 16:
+            let c = String.fromCharCode(Math.round(random(41, 127)));
+            addMessage(newMessage(generateName(), c+c, 3));
+            break;
+        default:
+          generateGreetingMsg();
+          break;
+      }
+    }
+    else if (viewers < initialViewers*0.5) { // toxic
+      r = Math.round(random(0, 17));
+      switch(r) {
+        case 0:
+          addMessage(newMessage(generateName(), "Not much so far...", 2));
+          break;
+        case 1:
+          addMessage(newMessage(generateName(), "Kind of underwhelmed", 3));
+          break;
+        case 2:
+          addMessage(newMessage(generateName(), "Well this is disappointing", 2));
+          break;
+        case 3:
+          addMessage(newMessage(generateName(), "Meh", 2));
+          break;        
+        case 4:
+          addMessage(newMessage(generateName(), "I could do better", 2));
+          break;
+        case 5:
+          if (Math.random() >= 0.5)
+            addMessage(newMessage(generateName(), "Not really into this", 2));
+          else if (Math.random() >= 0.5)
+            addMessage(newMessage(generateName(), "Not my kind of thing", 2));
+          else
+            addMessage(newMessage(generateName(), "Why would anyone like this?", 2));
+          break;        
+        case 6:
+          if (Math.random() >= 0.5)
+            addMessage(newMessage(generateName(), "You're wrong @"+lastUser, 3));
+          if (Math.random() >= 0.5)
+            addMessage(newMessage(generateName(), "What is @"+lastUser+" even on about?", 3));
+          else if (Math.random() >= 0.5)
+            addMessage(newMessage(generateName(), "I dunno @"+lastUser, 2));
+          else
+            addMessage(newMessage(generateName(), "What @"+lastUser, 3));
+          break;
+        case 7:
+          let c = String.fromCharCode(Math.round(random(41, 127)));
+          let c2 = String.fromCharCode(Math.round(random(41, 127)));
+          addMessage(newMessage(generateName(), c+c2+c+c+c2, 3));
+          break;
+        case 8:
+          addMessage(newMessage(generateName(), "Why does @"+playerName+" even bother?", 3));
+          break;
+        case 9:
+          addMessage(newMessage(generateName(), "Is @"+playerName+" even trying?", 3));
+          break;
+        case 10:
+          addMessage(newMessage(generateName(), "This sucks", 2));
+          break;
+        case 11:
+          addMessage(newMessage(generateName(), "Lame", 3));
+          break;
+        case 12:
+          addMessage(newMessage(generateName(), "What a mess", 2));
+          break;
+        case 13:
+          addMessage(newMessage(generateName(), "I don't get it", 3));
+          break;
+        case 14:
+          addMessage(newMessage(generateName(), "What am I looking at?", 3));
+          break;
+        case 15:
+          addMessage(newMessage("", "User @"+generateName()+" has been kicked from the chat", 1));
+          break;
+        default:
+          generateGreetingMsg();
+          break;
+      }
+    }
+    else { // neutral
+      r = Math.round(random(0, 12));
+      switch(r) {
+        case 0:
+          addMessage(newMessage(generateName(), "Not much so far...", 2));
+          break;
+        case 1:
+          addMessage(newMessage(generateName(), "Interested to see what happens next", 4));
+          break;
+        case 2:
+          if (Math.random() >= 0.5)
+            addMessage(newMessage(generateName(), "Not really into this yet", 4));
+          else if (Math.random() >= 0.5)
+            addMessage(newMessage(generateName(), "Not my kind of thing", 4));
+          else
+            addMessage(newMessage(generateName(), "This is cool, but not my kind of thing", 4));
+          break;
+        case 3:
+          if (getSecondsElapsed() < 60)
+            addMessage(newMessage(generateName(), "Looking forward to seeing this get going", 2));
+          else {
+            if (Math.random() >= 0.5)
+              addMessage(newMessage(generateName(), "I'll be right back, hope I don't miss anything", 2));
+            else if (Math.random() >= 0.5)
+              addMessage(newMessage(generateName(), "Be Right Back", 2));
+            else if (Math.random() >= 0.5)
+              addMessage(newMessage(generateName(), "Think I've seen enough, goodnight everyone", 2));
+            else if (Math.random() >= 0.5)
+              addMessage(newMessage(generateName(), "Gonna head off", 2));
+            else
+              addMessage(newMessage(generateName(), "brb", 2));
+          }
+          break;
+        case 4:
+          if (getSecondsElapsed() < 60)
+            addMessage(newMessage(generateName(), "@"+playerName+" is just getting started", 2));
+          else
+            addMessage(newMessage(generateName(), "Just give @"+playerName+" more time", 2));
+          break;
+        case 5:
+          if (Math.random() >= 0.5)
+            addMessage(newMessage(generateName(), "Interesting...", 3));
+          else if (Math.random() >= 0.5)
+            addMessage(newMessage(generateName(), "Hmm", 3));
+          else
+            addMessage(newMessage(generateName(), "...", 3));
+          break;
+        case 6:
+          if (Math.random() >= 0.5)
+            addMessage(newMessage(generateName(), "Hey its @"+lastUser, 3));
+          else if (Math.random() >= 0.5)
+            addMessage(newMessage(generateName(), "I dunno @"+lastUser, 2));
+          else
+            addMessage(newMessage(generateName(), "What @"+lastUser, 3));
+          break;
+        case 7:
           let c = String.fromCharCode(Math.round(random(41, 127)));
           addMessage(newMessage(generateName(), c+c, 3));
           break;
-      default:
-        generateGreetingMsg();
-        break;
-    }
-  }
-  else if (viewers < initialViewers*0.5) { // toxic
-    r = Math.round(random(0, 17));
-    switch(r) {
-      case 0:
-        addMessage(newMessage(generateName(), "Not much so far...", 2));
-        break;
-      case 1:
-        addMessage(newMessage(generateName(), "Kind of underwhelmed", 3));
-        break;
-      case 2:
-        addMessage(newMessage(generateName(), "Well this is disappointing", 2));
-        break;
-      case 3:
-        addMessage(newMessage(generateName(), "Meh", 2));
-        break;        
-      case 4:
-        addMessage(newMessage(generateName(), "I could do better", 2));
-        break;
-      case 5:
-        if (Math.random() >= 0.5)
-          addMessage(newMessage(generateName(), "Not really into this", 2));
-        else if (Math.random() >= 0.5)
-          addMessage(newMessage(generateName(), "Not my kind of thing", 2));
-        else
-          addMessage(newMessage(generateName(), "Why would anyone like this?", 2));
-        break;        
-      case 6:
-        if (Math.random() >= 0.5)
-          addMessage(newMessage(generateName(), "You're wrong @"+lastUser, 3));
-        if (Math.random() >= 0.5)
-          addMessage(newMessage(generateName(), "What is @"+lastUser+" even on about?", 3));
-        else if (Math.random() >= 0.5)
-          addMessage(newMessage(generateName(), "I dunno @"+lastUser, 2));
-        else
-          addMessage(newMessage(generateName(), "What @"+lastUser, 3));
-        break;
-      case 7:
-        let c = String.fromCharCode(Math.round(random(41, 127)));
-        let c2 = String.fromCharCode(Math.round(random(41, 127)));
-        addMessage(newMessage(generateName(), c+c2+c+c+c2, 3));
-        break;
-      case 8:
-        addMessage(newMessage(generateName(), "Why does @"+playerName+" even bother?", 3));
-        break;
-      case 9:
-        addMessage(newMessage(generateName(), "Is @"+playerName+" even trying?", 3));
-        break;
-      case 10:
-        addMessage(newMessage(generateName(), "This sucks", 2));
-        break;
-      case 11:
-        addMessage(newMessage(generateName(), "Lame", 3));
-        break;
-      case 12:
-        addMessage(newMessage(generateName(), "What a mess", 2));
-        break;
-      case 13:
-        addMessage(newMessage(generateName(), "I don't get it", 3));
-        break;
-      case 14:
-        addMessage(newMessage(generateName(), "What am I looking at?", 3));
-        break;
-      case 15:
-        addMessage(newMessage("", "User @"+generateName()+" has been kicked from the chat", 1));
-        break;
-      default:
-        generateGreetingMsg();
-        break;
-    }
-  }
-  else { // neutral
-    r = Math.round(random(0, 12));
-    switch(r) {
-      case 0:
-        addMessage(newMessage(generateName(), "Not much so far...", 2));
-        break;
-      case 1:
-        addMessage(newMessage(generateName(), "Interested to see what happens next", 4));
-        break;
-      case 2:
-        if (Math.random() >= 0.5)
-          addMessage(newMessage(generateName(), "Not really into this yet", 4));
-        else if (Math.random() >= 0.5)
-          addMessage(newMessage(generateName(), "Not my kind of thing", 4));
-        else
-          addMessage(newMessage(generateName(), "This is cool, but not my kind of thing", 4));
-        break;
-      case 3:
-        if (getSecondsElapsed() < 60)
-          addMessage(newMessage(generateName(), "Looking forward to seeing this get going", 2));
-        else {
+        case 8:
           if (Math.random() >= 0.5)
-            addMessage(newMessage(generateName(), "I'll be right back, hope I don't miss anything", 2));
+            addMessage(newMessage(generateName(), "@"+playerName+" has what it takes", 2));
           else if (Math.random() >= 0.5)
-            addMessage(newMessage(generateName(), "Be Right Back", 2));
-          else if (Math.random() >= 0.5)
-            addMessage(newMessage(generateName(), "Think I've seen enough, goodnight everyone", 2));
-          else if (Math.random() >= 0.5)
-            addMessage(newMessage(generateName(), "Gonna head off", 2));
+            addMessage(newMessage(generateName(), "You got this @"+playerName, 2));
           else
-            addMessage(newMessage(generateName(), "brb", 2));
-        }
-        break;
-      case 4:
-        if (getSecondsElapsed() < 60)
-          addMessage(newMessage(generateName(), "@"+playerName+" is just getting started", 2));
-        else
-          addMessage(newMessage(generateName(), "Just give @"+playerName+" more time", 2));
-        break;
-      case 5:
-        if (Math.random() >= 0.5)
-          addMessage(newMessage(generateName(), "Interesting...", 3));
-        else if (Math.random() >= 0.5)
-          addMessage(newMessage(generateName(), "Hmm", 3));
-        else
-          addMessage(newMessage(generateName(), "...", 3));
-        break;
-      case 6:
-        if (Math.random() >= 0.5)
-          addMessage(newMessage(generateName(), "Hey its @"+lastUser, 3));
-        else if (Math.random() >= 0.5)
-          addMessage(newMessage(generateName(), "I dunno @"+lastUser, 2));
-        else
-          addMessage(newMessage(generateName(), "What @"+lastUser, 3));
-        break;
-      case 7:
-        let c = String.fromCharCode(Math.round(random(41, 127)));
-        addMessage(newMessage(generateName(), c+c, 3));
-        break;
-      case 8:
-        if (Math.random() >= 0.5)
-          addMessage(newMessage(generateName(), "@"+playerName+" has what it takes", 2));
-        else if (Math.random() >= 0.5)
-          addMessage(newMessage(generateName(), "You got this @"+playerName, 2));
-        else
-          addMessage(newMessage(generateName(), "I think @"+playerName+" has potential", 2));
-        break;
-      case 9:
-        addMessage(newMessage(generateName(), "I'm a big fan of your work @"+playerName, 4));
-        break;
-      case 10:
-        addMessage(newMessage("", "User @"+generateName()+" has been kicked from the chat", 1));
-        break;
-      default:
-        generateGreetingMsg();
-        break;
+            addMessage(newMessage(generateName(), "I think @"+playerName+" has potential", 2));
+          break;
+        case 9:
+          addMessage(newMessage(generateName(), "I'm a big fan of your work @"+playerName, 4));
+          break;
+        case 10:
+          addMessage(newMessage("", "User @"+generateName()+" has been kicked from the chat", 1));
+          break;
+        default:
+          generateGreetingMsg();
+          break;
+      }
     }
-  }
+  }  
 }
 
 function generatePlayerMsgResponse() { // randomly generate a message commenting on player input
@@ -1066,7 +1163,7 @@ function generateNextChoiceMsg() {// randomly generate a message about the next 
 }
 
 function generateWaitingMsg() { // randomly generate a message after time has elapsed with no events
-  r = Math.round(random(0, 12));
+  r = Math.round(random(0, 13));
   switch(r) {
     case 0:
       addMessage(newMessage(generateName(), "Do something already!", 3));
@@ -1075,7 +1172,7 @@ function generateWaitingMsg() { // randomly generate a message after time has el
       addMessage(newMessage(generateName(), "@"+playerName+" hasn't made a choice in ages", 2));
       break;
     case 2:
-      addMessage(newMessage(generateName(), "Look and the bottom of the screen and do something", 2));
+      addMessage(newMessage(generateName(), "Look at the bottom of the screen and do something", 2));
       break;
     case 3:
       addMessage(newMessage(generateName(), "Do something pls", 2));
@@ -1101,86 +1198,254 @@ function generateWaitingMsg() { // randomly generate a message after time has el
     case 10:
       addMessage(newMessage(generateName(), "Is @"+playerName+" even here?", 3));
       break;
-    default:
+    case 11:
       addMessage(newMessage(generateName(), "This is boring, hope @"+playerName+" does something soon", 2));
+      break;
+    default:
+      addMessage(newMessage(generateName(), "zzz", 2));
       break;
   }
 }
 
-function generateChoiceResponse() { // randomly generate a message about the last choice made
+function generateChoiceResponse() { // randomly generate a message about the last choice made 
   let r;
-  if (viewers > initialViewers*1.5) { // happy
-    if (prevChoice.vFactor > 1) { // pro
-      r = Math.round(random(0, 14));
-      switch(r) {
-        case 0:
-          addMessage(newMessage(generateName(), prevChoice.text+" was such a great choice!", 2));
-          break;
-        default:
-          addMessage(newMessage(generateName(), "@"+playerName+" is doing great", 3));
-          break;
-      }
-    }
-    else { // cons
-      r = Math.round(random(0, 10));
-      switch(r) {
-        case 0:
-          addMessage(newMessage(generateName(), prevChoice.text+", an alright decision", 2));
-          break;
-        default:
-          addMessage(newMessage(generateName(), "I'm sure you know what you're doing", 3));
-          break;
-      }     
-    }
+  if (choiceResponseMsg.length != 0 && (Math.random() >= 0.75)) {
+    r = Math.round(random(0, choiceResponseMsg.length - 1));
+    addMessage(choiceResponseMsg[r]);
+    choiceResponseMsg.splice(r, 1);
   }
-  else if (viewers < initialViewers*0.5) { // toxic
-    if (prevChoice.vFactor > 1) { // pro
-      r = Math.round(random(0, 10));
-      switch(r) {
-        case 0:
-          addMessage(newMessage(generateName(), prevChoice.text+", guess its the best you could do", 2));
-          break;
-        default:
-          addMessage(newMessage(generateName(), "Seems like the only way of salvaging this mess", 3));
-          break;
-      }      
-    }
-    else { // cons
-      r = Math.round(random(0, 10));
-      switch(r) {
-        case 0:
-          addMessage(newMessage(generateName(), "WHY WOULD YOU "+prevChoice.text+"?!", 3));
-          break;
-        default:
-          addMessage(newMessage(generateName(), "@"+playerName+" has no idea what they're doing", 3));
-          break;
+  else {    
+    if (viewers > initialViewers*1.5) { // happy
+      if (prevChoice.vFactor > 1) { // pro
+        r = Math.round(random(0, 12));
+        switch(r) {
+          case 0:
+            addMessage(newMessage(generateName(), prevChoice.text+" was such a great choice!", 2));
+            break;
+          case 1:
+            addMessage(newMessage(generateName(), "They chose to "+prevChoice.text+", looks prefect", 2));
+            break;
+          case 2:
+            addMessage(newMessage(generateName(), "Glad they decided to "+prevChoice.text, 2));
+            break;
+          case 3:
+            addMessage(newMessage(generateName(), "Perfect, they decided to "+prevChoice.text, 2));
+            break;
+          case 4:
+            addMessage(newMessage(generateName(), "Great, they decided to "+prevChoice.text, 2));
+            break;
+          case 5:
+            addMessage(newMessage(generateName(), "Perfect, they decided to "+prevChoice.text, 2));
+            break;          
+          case 6:
+            addMessage(newMessage(generateName(), "They chose to "+prevChoice.text+", looks good", 2));
+            break;
+          case 7:
+            addMessage(newMessage(generateName(), "@"+playerName+" is a genuis", 2));
+            break;
+          case 7:
+            addMessage(newMessage(generateName(), "Dunno how @"+playerName+" does it", 2));
+            break;
+          case 8:
+            addMessage(newMessage(generateName(), "Looks great :)", 3));
+            break;
+          case 9:
+            addMessage(newMessage(generateName(), "A masterpiece", 3));
+            break;
+          case 10:
+            addMessage(newMessage(generateName(), "This is shaping up very nicely", 3));
+            break;
+          default:
+            addMessage(newMessage(generateName(), "@"+playerName+" is incredible", 3));
+            break;
+        }
       }
-      
-    }
-  }
-  else { // neutral
-    if (prevChoice.vFactor > 1) { // pro
-      r = Math.round(random(0, 10));
-      switch(r) {
-        case 0:
-          addMessage(newMessage(generateName(), "They chose to "+prevChoice.text+", looks good", 2));
-          break;
-        default:
-          addMessage(newMessage(generateName(), "This is shaping up nicely", 3));
-          break;
+      else { // cons
+        r = Math.round(random(0, 10));
+        switch(r) {
+          case 0:
+            addMessage(newMessage(generateName(), prevChoice.text+", an alright decision", 2));
+            break;
+          case 1:
+            addMessage(newMessage(generateName(), prevChoice.text+", is just okay", 2));
+            break;
+          case 2:
+            addMessage(newMessage(generateName(), "I wouldn't have chosen to "+prevChoice.text, 2));
+            break;
+          case 3:
+            addMessage(newMessage(generateName(), "Would have prefered something else", 2));
+            break; 
+          case 4:
+            addMessage(newMessage(generateName(),  prevBestChoice.text+" would have been better", 2));
+            break;         
+          case 5:
+            addMessage(newMessage(generateName(),  prevBestChoice.text+" would have been preferred", 2));
+            break;                  
+          case 6:
+            addMessage(newMessage(generateName(),  "Wish they went with "+prevBestChoice.text+" instead", 2));
+            break;
+          case 7:
+            addMessage(newMessage(generateName(),  "Meh, I would rather you "+prevBestChoice.text, 2));
+            break;
+          case 8:
+            addMessage(newMessage(generateName(),  "Not as great as your other decisions", 2));
+            break;
+          default:
+            addMessage(newMessage(generateName(), "I'm sure you know what you're doing", 3));
+            break;
+        }     
       }
-      
     }
-    else { // cons
-      r = Math.round(random(0, 10));
-      switch(r) {
-        case 0:
-          addMessage(newMessage(generateName(), "Why did they "+prevChoice.text+"?", 2));
-          break;
-        default:
-          addMessage(newMessage(generateName(), "@"+playerName+" is ruining it", 3));
-          break;
-      }      
+    else if (viewers < initialViewers*0.5) { // toxic
+      if (prevChoice.vFactor > 1) { // pro
+        r = Math.round(random(0, 8));
+        switch(r) {
+          case 0:
+            addMessage(newMessage(generateName(), prevChoice.text+", guess its the best you could do", 2));
+            break;
+          case 1:
+            addMessage(newMessage(generateName(), prevChoice.text+", a bit better I suppose...", 2));
+            break;
+          case 2:
+            addMessage(newMessage(generateName(), "At least choosing to "+prevChoice.text+", was better", 2));
+            break;
+          case 3:
+            addMessage(newMessage(generateName(), "They choose to "+prevChoice.text+", thankfully", 2));
+            break;
+          case 4:
+            addMessage(newMessage(generateName(), "Maybe it'll start to get better", 3));
+            break;
+          case 5:
+            addMessage(newMessage(generateName(), "I like this better than the alternatives", 2));
+            break;
+          case 6:
+            addMessage(newMessage(generateName(), "Meh", 2));
+            break;
+          default:
+            addMessage(newMessage(generateName(), "Seems like the only way of salvaging this mess", 3));
+            break;
+        }      
+      }
+      else { // cons
+        r = Math.round(random(0, 12));
+        switch(r) {
+          case 0:
+            addMessage(newMessage(generateName(), "WHY WOULD YOU "+prevChoice.text+"?!", 3));
+            break;
+          case 1:
+            addMessage(newMessage(generateName(), "WHY WOULD ANYONE "+prevChoice.text, 3));
+            break;
+          case 2:
+            addMessage(newMessage(generateName(), "@"+playerName+" chose to "+prevChoice.text+", WHYYY", 3));
+            break;
+          case 3:
+            addMessage(newMessage(generateName(), prevChoice.text+" was the worst possible decision...", 3));
+            break;
+          case 4:
+            addMessage(newMessage(generateName(), prevChoice.text+" is really lame", 3));
+            break;
+          case 5:
+            addMessage(newMessage(generateName(), prevBestChoice.text+" would have been so much better", 3));
+            break;
+          case 6:
+            addMessage(newMessage(generateName(), "WHY DIDNT YOU JUST "+prevBestChoice.text, 3));
+            break;
+          case 7:
+            addMessage(newMessage(generateName(), "OBVIOUSLY "+prevBestChoice.text+" WOULDVE BEEN BETTER THAN THIS", 3));
+            break;
+          case 8:
+            addMessage(newMessage(generateName(), "THEY DIDNT EVEN "+prevBestChoice.text, 3));
+            break;
+          case 9:
+            addMessage(newMessage(generateName(), "@"+playerName+" is making the WORST decisions", 3));
+            break;
+          case 10:
+            addMessage(newMessage(generateName(), "@"+playerName+" just RUINED it", 3));
+            break;
+          default:
+            addMessage(newMessage(generateName(), "@"+playerName+" has no idea what they're doing", 3));
+            break;
+        }
+        
+      }
+    }
+    else { // neutral
+      if (prevChoice.vFactor > 1) { // pro
+        r = Math.round(random(0, 11));
+        switch(r) {
+          case 0:
+            addMessage(newMessage(generateName(), "They chose to "+prevChoice.text+", looks good", 2));
+            break;
+          case 1:
+            addMessage(newMessage(generateName(), "They chose to "+prevChoice.text+", looks prefect", 2));
+            break;
+          case 2:
+            addMessage(newMessage(generateName(), "Glad they decided to "+prevChoice.text, 2));
+            break;
+          case 3:
+            addMessage(newMessage(generateName(), "Neat, they decided to "+prevChoice.text, 2));
+            break;
+          case 4:
+            addMessage(newMessage(generateName(), "Great, they decided to "+prevChoice.text, 2));
+            break;
+          case 5:
+            addMessage(newMessage(generateName(), prevChoice.text+" looks really nice", 2));
+            break;          
+          case 6:
+            addMessage(newMessage(generateName(), "They chose to "+prevChoice.text+", looks amazing", 2));
+            break;
+          case 7:
+            addMessage(newMessage(generateName(), "So happy they did "+prevChoice.text, 2));
+            break;
+          case 8:
+            addMessage(newMessage(generateName(), "Looks incredible", 3));
+            break;
+          case 9:
+            addMessage(newMessage(generateName(), "Nice", 3));
+            break;
+          default:
+            addMessage(newMessage(generateName(), "This is shaping up nicely", 3));
+            break;
+        }      
+      }
+      else { // cons
+        r = Math.round(random(0, 11));
+        switch(r) {
+          case 0:
+            addMessage(newMessage(generateName(), "Why did they "+prevChoice.text+"?", 2));
+            break;
+          case 1:
+            addMessage(newMessage(generateName(), "Why would anyone "+prevChoice.text+"?", 2));
+            break;
+          case 2:
+            addMessage(newMessage(generateName(), "@"+playerName+" why would you "+prevChoice.text+"?", 2));
+            break;
+          case 3:
+            addMessage(newMessage(generateName(),  "Since they chose to "+prevChoice.text+" it sucks now", 2));
+            break;
+          case 4:
+            addMessage(newMessage(generateName(),  "This really isn't looking great", 2));
+            break;
+          case 5:
+            addMessage(newMessage(generateName(),  "They should have gone with "+prevBestChoice.text+" instead", 2));
+            break;
+          case 6:
+            addMessage(newMessage(generateName(),  prevBestChoice.text+" would have been better", 2));
+            break;
+          case 7:
+            addMessage(newMessage(generateName(),  prevBestChoice.text+" > "+prevChoice.text, 2));
+            break;
+          case 8:
+            addMessage(newMessage(generateName(),  prevBestChoice.text+" is better than "+prevChoice.text, 2));
+            break;
+          case 9:
+            addMessage(newMessage(generateName(),  "Why didn't they just "+prevChoice.text+"?", 2));
+            break;
+          default:
+            addMessage(newMessage(generateName(), "@"+playerName+" is ruining it", 3));
+            break;
+        }      
+      }
     }
   }
 }
@@ -1283,10 +1548,21 @@ function writeMessage() { //* handle player text input
 }
 
 function makeChoice(n, id) { //* trigger events from making a choice, 
-  //n is the current choice and id is the choice made (between 0 and 2)
+  // n is the current choice and id is the choice made (between 0 and 2)
   let i = n*3 + id;
   choicesMade++;
   prevChoice = choices[i];
+
+  // set the prev best choice as the choice with the max value
+  let max = Math.max(choices[n*3].vFactor, choices[n*3+1].vFactor, choices[n*3+2].vFactor);
+  if (max == choices[n*3].vFactor)
+    prevBestChoice = choices[n*3];
+  else if (max == choices[n*3+1].vFactor)
+    prevBestChoice = choices[n*3+1];
+  else    
+    prevBestChoice = choices[n*3+2];
+
+  console.log(prevBestChoice);
   timeOfLastChoice = getSecondsElapsed();
 
   canvasFunctions.push(choices[i]);
