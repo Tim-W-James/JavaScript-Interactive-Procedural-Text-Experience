@@ -4,6 +4,9 @@
 */
 
 // TODO add sounds
+// TODO add additional looping choices
+// TODO refine choices
+// TODO endings?
 
 // variable declaration
 let input, button, player, users, viewers, displayedViewers;
@@ -57,6 +60,9 @@ let hue, saturation;
 let shapeColorR, shapeColorG, shapeColorB;
 let outlineType = 0;    // 0 : none, 1 : none, 2 : normal, 3 : thick
 let transType = 0;      // 0 : none, 1 : none, 2 : subtle, 3 : strong
+
+// looping canvas variables
+let sizeModifier = 0;
 
 function preload() {
   // instantiate complex objects
@@ -218,9 +224,9 @@ function instantiateChoices() { // create a list of possible choices, where 3 ar
 
   choicesLoop = [    
     newChoice("keep things the \nsame", 0, 1, 1, function S() {}),
-    newChoice("add more circles", 0, 1.1, 1, function L0() {fill(255, 10);ellipse(random(10, canvasWidth-10), random(80, canvasHeight-10), 25);}),
-    newChoice("add more squares", 0, 0.95, 1, function L1() {fill(255, 10);rect(random(10, canvasWidth-10), random(80, canvasHeight-10), 25, 25);}),   
-    newChoice("add more triangles", 0, 0.8, 1, function L2() {fill(255, 10);myTriangle(random(10, canvasWidth-10), random(80, canvasHeight-10), 25);}), 
+    newChoice("add more circles", 0, 1.1, 1, function L0() {fill(255, 10);ellipse(random(10, canvasWidth-10), random(80, canvasHeight-10), 50);}),
+    newChoice("add more squares", 0, 0.95, 1, function L1() {fill(255, 10);rect(random(10, canvasWidth-10), random(80, canvasHeight-10), 25, 50);}),   
+    newChoice("add more triangles", 0, 0.8, 1, function L2() {fill(255, 10);myTriangle(random(10, canvasWidth-10), random(80, canvasHeight-10), 50);}), 
     newChoice("kick a member of \nchat", -1, 0.5, 1, function L3() {addMessage(newMessage("", "User @"+generateName()+" has been kicked from the chat", 1));})
   ]
 }
@@ -1866,7 +1872,7 @@ function newMessage(u, s, t) {  // stores information about a message
 function displayMessages(messages) { // displays a list of messages in the chat window
   let rowOffset = 0;
   noStroke();
-  textFont('Consolas');
+  textFont('"Consolas", monaco, monospace');
   textSize(20);
   textAlign(LEFT);
 
@@ -2070,7 +2076,9 @@ function displayCanvas(f) { // run functions that create the canvas
     else if (sizeType == 2)         // small
       shapeSize = 50;
     else if (sizeType == 3)         // random
-      shapeSize = random(50,150);  
+      shapeSize = random(50,150);
+    
+    shapeSize += sizeModifier;
 
     if (movementType == 1) {        // scatter
       nextPosX = random(shapeSize/2, canvasWidth-shapeSize/2);
