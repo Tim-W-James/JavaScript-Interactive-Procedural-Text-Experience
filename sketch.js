@@ -9,7 +9,7 @@
 // TODO endings?
 
 // variable declaration
-let input, button, player, users, viewers, displayedViewers;
+let fontAnonymous, input, button, player, users, viewers, displayedViewers;
 let canvasWidth, canvasHeight, chatStatus, initialTime;
 let greetingMsg, choiceResponseMsg, idleChoiceMsg;
 let names, adjectives, nouns;
@@ -65,6 +65,9 @@ let transType = 0;      // 0 : none, 1 : none, 2 : subtle, 3 : strong
 let sizeModifier = 0;
 
 function preload() {
+  // load font  
+  fontAnonymous = loadFont('assets/AnonymousPro-Regular.ttf');
+
   // instantiate complex objects
   instantiateChoices();
   instantiateUsers();
@@ -224,10 +227,12 @@ function instantiateChoices() { // create a list of possible choices, where 3 ar
 
   choicesLoop = [    
     newChoice("keep things the \nsame", 0, 1, 1, function S() {}),
-    newChoice("add more circles", 0, 1.1, 1, function L0() {fill(255, 10);ellipse(random(10, canvasWidth-10), random(80, canvasHeight-10), 50);}),
-    newChoice("add more squares", 0, 0.95, 1, function L1() {fill(255, 10);rect(random(10, canvasWidth-10), random(80, canvasHeight-10), 25, 50);}),   
-    newChoice("add more triangles", 0, 0.8, 1, function L2() {fill(255, 10);myTriangle(random(10, canvasWidth-10), random(80, canvasHeight-10), 50);}), 
-    newChoice("kick a member of \nchat", -1, 0.5, 1, function L3() {addMessage(newMessage("", "User @"+generateName()+" has been kicked from the chat", 1));})
+    newChoice("add a random \ncircle", -2, 1.1, 1, function L0() {fill(random(0,255), random(0,255), random(0,255));ellipse(random(10, canvasWidth-10), random(80, canvasHeight-10), random(10,100));}),
+    newChoice("add a random \nsquare", -2, 0.95, 1, function L1() {fill(random(0,255), random(0,255), random(0,255));rect(random(10, canvasWidth-10), random(80, canvasHeight-10), random(10,100), random(10,100));}),
+    newChoice("add a random \ntriangle", -2, 0.8, 1, function L2() {fill(random(0,255), random(0,255), random(0,255));myTriangle(random(10, canvasWidth-10), random(80, canvasHeight-10), random(10,100));}),
+    newChoice("increase shape size", -2, 1.1, 1, function L3() {sizeModifier += 20;}),
+    newChoice("decrease shape size", -2, 0.95, 1, function L4() {sizeModifier -= 20;}),
+    newChoice("kick a member of \nchat", -1, 0.5, 1, function L5() {addMessage(newMessage("", "User @"+generateName()+" has been kicked from the chat", 1));})
   ]
 }
 
@@ -1872,8 +1877,7 @@ function newMessage(u, s, t) {  // stores information about a message
 function displayMessages(messages) { // displays a list of messages in the chat window
   let rowOffset = 0;
   noStroke();
-  textFont('Consolas');
-  textFont('Courier New');
+  textFont(fontAnonymous);
   textSize(20);
   textAlign(LEFT);
 

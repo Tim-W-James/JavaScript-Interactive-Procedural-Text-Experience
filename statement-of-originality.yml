@@ -20,6 +20,9 @@ assets:
   - comment: "Twitch Logo"
     url: https://www.twitch.tv/
     licence: fair use
+  - comment: "Anonymous Font by Mark Simonson"
+    url: https://www.1001fonts.com/anonymous-pro-font.html
+    licence: fair use
 
 
 # sign *your* name and uid here
