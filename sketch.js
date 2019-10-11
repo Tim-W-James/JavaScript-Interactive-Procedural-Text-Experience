@@ -1872,7 +1872,8 @@ function newMessage(u, s, t) {  // stores information about a message
 function displayMessages(messages) { // displays a list of messages in the chat window
   let rowOffset = 0;
   noStroke();
-  textFont('monospace');
+  textFont('Courier New');
+  textFont('Consolas');
   textSize(20);
   textAlign(LEFT);
 
