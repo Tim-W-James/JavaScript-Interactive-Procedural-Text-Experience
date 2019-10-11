@@ -80,7 +80,7 @@ function setup() {
   input = createInput();
   input.style('width: 500px');
   input.style('font-size: 50px');
-  input.style('font-family: "Consolas", monaco, monospace');
+  input.style('font-family: monospace');
   input.style('background-color: #191919');
   input.style('border-color: #646464');
 
@@ -1872,7 +1872,7 @@ function newMessage(u, s, t) {  // stores information about a message
 function displayMessages(messages) { // displays a list of messages in the chat window
   let rowOffset = 0;
   noStroke();
-  textFont('"Consolas", monaco, monospace');
+  textFont('monospace');
   textSize(20);
   textAlign(LEFT);
 
