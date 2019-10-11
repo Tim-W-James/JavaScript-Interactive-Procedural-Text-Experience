@@ -67,6 +67,8 @@ let sizeModifier = 0;
 function preload() {
   // load font  
   fontAnonymous = loadFont('assets/AnonymousPro-Regular.ttf');
+  fontAnonymousBold = loadFont('assets/AnonymousPro-Bold.ttf');
+  fontAnonymousItalics = loadFont('assets/AnonymousPro-Italics.ttf');
 
   // instantiate complex objects
   instantiateChoices();
@@ -1885,6 +1887,7 @@ function displayMessages(messages) { // displays a list of messages in the chat 
   for (i = 0; i < messages.length; i++) {
     fill(100);
     textStyle(NORMAL);
+    textFont(fontAnonymous);
     text(messages[i].time, windowWidth - chatWidth + 10, 25*(i+rowOffset+1));
     fill(200);
 
@@ -1892,14 +1895,17 @@ function displayMessages(messages) { // displays a list of messages in the chat 
     let tempStr;
     if (messages[i].type == 0) {
       textStyle(BOLD);
+      textFont(fontAnonymousBold);
       tempStr = messages[i].user + ": " + messages[i].text;
     }
     else if (messages[i].type == 1) {
       textStyle(ITALIC);
+      textFont(fontAnonymousItalics);
       tempStr = messages[i].text;
     }
     else {
       textStyle(NORMAL);
+      textFont(fontAnonymous);
       tempStr = messages[i].user + ": " + messages[i].text;
     }
 
@@ -1912,6 +1918,7 @@ function displayMessages(messages) { // displays a list of messages in the chat 
     else
       text(tempStr,windowWidth - chatWidth + 75, 25*(i+rowOffset+1));
   }
+  textFont(fontAnonymous);
   textStyle(NORMAL);
 }
 
