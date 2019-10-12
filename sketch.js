@@ -63,6 +63,10 @@ let transType = 0;      // 0 : none, 1 : none, 2 : subtle, 3 : strong
 
 // looping canvas variables
 let sizeModifier = 0;
+let bgColorModifier = 0;
+let rotationModifier = 0;
+let translationXModifier = 0;
+let translationYModifier = 0;
 
 function preload() {
   // load font  
@@ -102,6 +106,7 @@ function setup() {
   viewers = initialViewers;
   displayedViewers = Math.round(random(0.98*viewers, 1.02*viewers));
 
+  // revert if  undefined
   loopChoiceA = choicesLoop[0];
   loopChoiceB = choicesLoop[0];
   loopChoiceC = choicesLoop[0];
@@ -128,6 +133,8 @@ function draw() {
   }
   // once user has entered their name, run as normal
   else {
+    rotate(rotationModifier);
+    translate(translationXModifier, translationYModifier);
     if (choicesMade > 9 && !isChoiceLooping) { // once out of choices, loop
       isChoiceLooping = true;
       generateLoopingChoices();
@@ -185,6 +192,7 @@ function draw() {
 */
 
 function instantiateChoices() { // create a list of possible choices, where 3 are displayed at a time
+  // choice ids = 0, 1, 2 : non-looping normal, -1 : run once only, not in chat, -2 : run once only, -3 : not in chat, -4 : looping normal
   choices = [
     newChoice("keep the background \nblack", 0, 1.3, 0, function A0() {backgroundType = 1;}),
     newChoice("set a white background", 1, 1.2, 0, function A1() {backgroundType = 2;}),
@@ -229,12 +237,38 @@ function instantiateChoices() { // create a list of possible choices, where 3 ar
 
   choicesLoop = [    
     newChoice("keep things the \nsame", 0, 1, 1, function S() {}),
-    newChoice("add a random \ncircle", -2, 1.1, 1, function L0() {fill(random(0,255), random(0,255), random(0,255));ellipse(random(10, canvasWidth-10), random(80, canvasHeight-10), random(10,100));}),
-    newChoice("add a random \nsquare", -2, 0.95, 1, function L1() {fill(random(0,255), random(0,255), random(0,255));rect(random(10, canvasWidth-10), random(80, canvasHeight-10), random(10,100), random(10,100));}),
-    newChoice("add a random \ntriangle", -2, 0.8, 1, function L2() {fill(random(0,255), random(0,255), random(0,255));myTriangle(random(10, canvasWidth-10), random(80, canvasHeight-10), random(10,100));}),
-    newChoice("increase shape size", -2, 1.1, 1, function L3() {sizeModifier += 20;}),
-    newChoice("decrease shape size", -2, 0.95, 1, function L4() {sizeModifier -= 20;}),
-    newChoice("kick a member of \nchat", -1, 0.5, 1, function L5() {addMessage(newMessage("", "User @"+generateName()+" has been kicked from the chat", 1));})
+    newChoice("add a random \ncircle", -2, 1.1, 1, function L0() {
+      fill(random(0,255), random(0,255), random(0,255));
+      ellipse(random(10, canvasWidth-10), random(80, canvasHeight-10), random(50,200));}),
+    newChoice("add a random \nsquare", -2, 0.95, 1, function L1() {
+      fill(random(0,255), random(0,255), random(0,255));
+      rect(random(10, canvasWidth-10), random(80, canvasHeight-10), random(50,200), random(50,200));}),
+    newChoice("add a random \ntriangle", -2, 0.8, 1, function L2() {
+      fill(random(0,255), random(0,255), random(0,255));
+      myTriangle(random(10, canvasWidth-10), random(80, canvasHeight-10), random(50,200));}),
+    newChoice("increase shape size", -2, 1.5, 1, function L3() {sizeModifier += 40;}),
+    newChoice("decrease shape size", -2, 0.6, 1, function L4() {sizeModifier -= 40;}),
+    newChoice("make the background \ndarker", -2, 1.1, 1, function L5() {bgColorModifier -= 50;}),
+    newChoice("make the background \nlighter", -2, 0.7, 1, function L6() {bgColorModifier += 50;}),
+    newChoice("randomize everything", -2, 0.7, 1, function L7() {
+      backgroundType = Math.round(random(1,3)); shapeType = Math.round(random(1,3)); colorType = Math.round(random(1,3)); movementType = Math.round(random(1,3)); 
+      speedType = Math.round(random(1,3)); sizeType = Math.round(random(1,3)); fadeType = Math.round(random(1,3)); colorShiftType = Math.round(random(1,3)); 
+      outlineType = Math.round(random(1,3)); transType = Math.round(random(1,3));}),
+    newChoice("constantly randomize everything", -4, 0.7, 1, function L7() {
+      shapeType = Math.round(random(1,3)); colorType = Math.round(random(1,3)); movementType = Math.round(random(1,3)); 
+      speedType = Math.round(random(1,3)); sizeType = Math.round(random(1,3)); fadeType = Math.round(random(1,3)); colorShiftType = Math.round(random(1,3)); 
+      outlineType = Math.round(random(1,3)); transType = Math.round(random(1,3));}),
+    newChoice("pick this choice", -1, 1.25, 1, function Z0() {}),
+    newChoice("don't pick this \nchoice", -1, 0.75, 1, function Z1() {}),
+    newChoice("rotate everything", -1, 0.75, 1, function Z2() {rotationModifier += (random(-0.01, 0.01));reloadBG();}),
+    newChoice("translate everything", -1, 0.75, 1, function Z2() {translationXModifier += random(-5,5); translationYModifier += random(-5,5);reloadBG();}),
+    newChoice("randomly change \nyour name", -1, 0.5, 1, function Z3() {playerName = generateName();}),
+    newChoice("say \"hi\" in \nchat", -1, 1.5, 1, function Z4() {addMessage(newMessage("", "Hi!", 0));}),
+    newChoice("say \"hi\" in \nchat", -1, 0.5, 1, function Z4() {addMessage(newMessage("", "I didn't choose this.", 0));}),
+    newChoice("kick a member of \nchat", -1, 0.5, 1, function Z5() {addMessage(newMessage("", "User @"+generateName()+" has been kicked from the chat", 1));}),
+    newChoice("add a moderator to \nchat", -1, 0.75, 1, function Z6() {addMessage(newMessage("", "Moderator @"+generateName()+" has joined the chat", 1));}),
+    newChoice("make the chat smaller", -1, 0.25, 1, function Z7() {chatWidth -= 10;}),
+    newChoice("make the chat larger", -1, 2, 1, function Z8() {chatWidth += 10;})
   ]
 }
 
@@ -985,7 +1019,7 @@ function generateNextChoiceMsg() { // randomly generate a message about the next
     else
       c = loopChoiceC;
     
-    if (c.id == -1)
+    if (c.id == -1 || c.id == -3)
       c = loopChoiceA;
   }
   else {
@@ -1676,17 +1710,17 @@ function makeChoice(n, id) { //* trigger events from making a choice,
   return choices[i];
 }
 
-function makeLoopingChoice(id) { // makes a loopable choice
+function makeLoopingChoice(i) { // makes a loopable choice
   let c;
-  if (id == 1)
+  if (i == 1)
     c = loopChoiceA;
-  else if (id == 2)
+  else if (i == 2)
     c = loopChoiceB;
   else
     c = loopChoiceC;
 
   choicesMade++;
-  if (c.id == -1)
+  if (c.id == -1 || c.id == -3)
     prevChoice = newChoice("do that", 0, 1, 0, function Z() {});
   else
     prevChoice = c;
@@ -1828,7 +1862,8 @@ function compareChoices(a, b) { // compares the order of two choices
 function newChoice(t, i, v, o, f) { // stores information about a choice
   let choice = {
     text : t,
-    id : i,
+    // 0, 1, 2 : non-looping normal, -1 : run once only, not in chat, -2 : run once only, -3 : not in chat, -4 : looping normal
+    id : i, 
     vFactor : v,
     order : o,
     function : f
@@ -1990,11 +2025,11 @@ function displayCanvas(f) { // run functions that create the canvas
   canvasWidth = windowWidth - chatWidth;
   canvasHeight = windowHeight - 140;
   for (i = 0; i < f.length; i++) {
-    if (f[i].id < 0) { // only run special choice functions once
+    if (f[i].id == -1 || f[i].id == -2) { // only run special choice functions once
       f[i].function();
       f.splice(i, 1);
     }
-    else
+    else if (!isChoiceLooping || f[i].id == -4)
       f[i].function();
   }
 
@@ -2006,13 +2041,16 @@ function displayCanvas(f) { // run functions that create the canvas
   else                              // medium fade
     fade = 20;
 
+  let bgColor = 200;
   if (backgroundType == 2)          // white background
-    fill(200, fade);
+    bgColor = 200
   else if (backgroundType == 3)     // gray background
-    fill(50, fade);
+    bgColor = 50;
   else                              // black background
-    fill(0, fade);  
-  rect(0, 70, canvasWidth, canvasHeight);    
+    bgColor = 0;
+
+  fill(bgColor+bgColorModifier, fade);
+  rect(0, 70, canvasWidth, canvasHeight);
 
   let spd;
   if (speedType == 2)                 // slow
@@ -2139,11 +2177,11 @@ function displayCanvas(f) { // run functions that create the canvas
     
     if (shapeType == 1)             // circle
       ellipse(nextPosX, nextPosY, shapeSize);
-    else if (shapeType == 2) {      // square
+    else if (shapeType == 2) {      // rectangle
       let shapeSize2 = shapeSize;
       if (sizeType == 3)
         shapeSize2 = random(50,150);
-      rect(nextPosX-50, nextPosY-50, shapeSize, shapeSize2);
+      rect(nextPosX-shapeSize/2, nextPosY-shapeSize/2, shapeSize, shapeSize2);
     }
     else if (shapeType == 3) {      // triangle
       if (movementType != 0 && movementType != 3) {
@@ -2155,15 +2193,29 @@ function displayCanvas(f) { // run functions that create the canvas
       else
         myTriangle(nextPosX, nextPosY, shapeSize);
     }
-  }  
+  }
 
   // reset
   noStroke();
   strokeWeight(1);
 }
 
+function reloadBG() { // reload the background to remove afterimages
+  let bgColor;
+  if (backgroundType == 2)          // white background
+    bgColor = 200
+  else if (backgroundType == 3)     // gray background
+    bgColor = 50;
+  else                              // black background
+    bgColor = 0;
+  background(bgColor);
+}
+
 function displayBackUI() { // display the back layer of UI
-  fill(15, 200);
+  if (frameCount%1000 == 0) 
+    reloadBG();
+
+  fill(20);
   stroke(100);
   rect(windowWidth-chatWidth, 0, windowWidth, windowHeight);
   rect(0, 0, windowWidth-chatWidth, 70);
