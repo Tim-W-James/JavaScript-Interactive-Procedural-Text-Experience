@@ -4,9 +4,6 @@
 */
 
 // TODO add sounds
-// TODO add additional looping choices
-// TODO refine choices
-// TODO endings?
 
 // variable declaration
 let fontAnonymous, input, button, player, users, viewers, displayedViewers;
