@@ -43,6 +43,8 @@ let isHoveringB = false;
 let isHoveringC = false;
 let hasEnteredName = false;
 let isChoiceLooping = false;
+let isEndingA = false; // ending A where the canvas becomes the chat
+let isEndingB = false; // ending B where chat is deleted
 
 // canvas variables
 let backgroundType = 0; // 0 : black, 1 : black, 2 : white, 3 : gray
@@ -62,6 +64,7 @@ let outlineType = 0;    // 0 : none, 1 : none, 2 : normal, 3 : thick
 let transType = 0;      // 0 : none, 1 : none, 2 : subtle, 3 : strong
 
 // looping canvas variables
+let isRandomizing = false;
 let sizeModifier = 0;
 let bgColorModifier = 0;
 let rotationModifier = 0;
@@ -135,6 +138,19 @@ function draw() {
   else {
     rotate(rotationModifier);
     translate(translationXModifier, translationYModifier);
+
+    if (isEndingB && chatWidth > 1) // start ending B sequence
+      chatWidth -= 2;
+    else if (isEndingB) {
+      rotationModifier = 0.02;
+      translationXModifier = 10;
+      translationYModifier = -10;
+      viewers = 0;
+    }
+
+    if (isEndingA && chatWidth < windowWidth) // start ending A sequence
+      chatWidth += 10;      
+
     if (choicesMade > 9 && !isChoiceLooping) { // once out of choices, loop
       isChoiceLooping = true;
       generateLoopingChoices();
@@ -254,21 +270,18 @@ function instantiateChoices() { // create a list of possible choices, where 3 ar
       backgroundType = Math.round(random(1,3)); shapeType = Math.round(random(1,3)); colorType = Math.round(random(1,3)); movementType = Math.round(random(1,3)); 
       speedType = Math.round(random(1,3)); sizeType = Math.round(random(1,3)); fadeType = Math.round(random(1,3)); colorShiftType = Math.round(random(1,3)); 
       outlineType = Math.round(random(1,3)); transType = Math.round(random(1,3));}),
-    newChoice("constantly randomize everything", -4, 0.7, 1, function L7() {
-      shapeType = Math.round(random(1,3)); colorType = Math.round(random(1,3)); movementType = Math.round(random(1,3)); 
-      speedType = Math.round(random(1,3)); sizeType = Math.round(random(1,3)); fadeType = Math.round(random(1,3)); colorShiftType = Math.round(random(1,3)); 
-      outlineType = Math.round(random(1,3)); transType = Math.round(random(1,3));}),
-    newChoice("pick this choice", -1, 1.25, 1, function Z0() {}),
-    newChoice("don't pick this \nchoice", -1, 0.75, 1, function Z1() {}),
-    newChoice("rotate everything", -1, 0.75, 1, function Z2() {rotationModifier += (random(-0.01, 0.01));reloadBG();}),
-    newChoice("translate everything", -1, 0.75, 1, function Z2() {translationXModifier += random(-5,5); translationYModifier += random(-5,5);reloadBG();}),
-    newChoice("randomly change \nyour name", -1, 0.5, 1, function Z3() {playerName = generateName();}),
+    newChoice("constantly randomize everything", -2, 1.3, 1, function L8() {isRandomizing = true;}),
+    newChoice("pick this choice", -1, 1.7, 1, function Z0() {}),
+    newChoice("don't pick this \nchoice", -1, 0.3, 1, function Z1() {}),
+    // newChoice("rotate everything", -1, 0.75, 1, function Z2() {rotationModifier += (random(-0.01, 0.01));reloadBG();}),
+    // newChoice("translate everything", -1, 0.75, 1, function Z2() {translationXModifier += random(-5,5); translationYModifier += random(-5,5);reloadBG();}),
+    newChoice("randomly change \nyour name", -1, 1.2, 1, function Z3() {playerName = generateName();}),
     newChoice("say \"hi\" in \nchat", -1, 1.5, 1, function Z4() {addMessage(newMessage("", "Hi!", 0));}),
-    newChoice("say \"hi\" in \nchat", -1, 0.5, 1, function Z4() {addMessage(newMessage("", "I didn't choose this.", 0));}),
+    newChoice("say \"hi\" in \nchat", -1, 1, 1, function Z4() {addMessage(newMessage("", "I didn't choose this.", 0));}),
     newChoice("kick a member of \nchat", -1, 0.5, 1, function Z5() {addMessage(newMessage("", "User @"+generateName()+" has been kicked from the chat", 1));}),
     newChoice("add a moderator to \nchat", -1, 0.75, 1, function Z6() {addMessage(newMessage("", "Moderator @"+generateName()+" has joined the chat", 1));}),
-    newChoice("make the chat smaller", -1, 0.25, 1, function Z7() {chatWidth -= 10;}),
-    newChoice("make the chat larger", -1, 2, 1, function Z8() {chatWidth += 10;})
+    newChoice("make the chat smaller", -1, 0.25, 1, function Z7() {chatWidth -= 30;}),
+    newChoice("make the chat larger", -1, 2, 1, function Z8() {chatWidth += 30;})
   ]
 }
 
@@ -576,7 +589,7 @@ function instantiateChatMessages() { // create lists of different chat messages
 }
 
 function startStreaming() { // setup in preparation for streaming
-  input.style('width: 450px');
+  input.style('width', parseInt(chatWidth) + 'px');
   input.style('font-size: 25px');
   button.style('width: 50px');
   button.style('font-size: 25px');
@@ -601,65 +614,67 @@ function startStreaming() { // setup in preparation for streaming
 */
 
 function generateNextMsg() { // decide what message to add to chat, based on current events
-  let totalValues = chatStatus.playerMsgResponse + chatStatus.choiceResponse + chatStatus.greeting 
-    + chatStatus.waiting + chatStatus.nextChoice + chatStatus.idle ;
-  let randomValue = random(0, totalValues);
+  if (chatWidth > 100) {
+    let totalValues = chatStatus.playerMsgResponse + chatStatus.choiceResponse + chatStatus.greeting 
+      + chatStatus.waiting + chatStatus.nextChoice + chatStatus.idle ;
+    let randomValue = random(0, totalValues);
 
-  // respond to input from the user
-  if (randomValue < chatStatus.playerMsgResponse) { 
-    generatePlayerMsgResponse();
+    // respond to input from the user
+    if (randomValue < chatStatus.playerMsgResponse) { 
+      generatePlayerMsgResponse();
 
-    // decay chance
-    chatStatus.playerMsgResponse = chatStatus.playerMsgResponse*0.75;
-    if (chatStatus.playerMsgResponseAcc > 2) {
-      chatStatus.playerMsgResponse = 0;
-      chatStatus.playerMsgResponseAcc = 0;
+      // decay chance
+      chatStatus.playerMsgResponse = chatStatus.playerMsgResponse*0.75;
+      if (chatStatus.playerMsgResponseAcc > 2) {
+        chatStatus.playerMsgResponse = 0;
+        chatStatus.playerMsgResponseAcc = 0;
+      }
+      else
+        chatStatus.playerMsgResponseAcc++;
     }
-    else
-      chatStatus.playerMsgResponseAcc++;
-  }
-  // respond to choices from the user
-  else if (randomValue < chatStatus.playerMsgResponse + chatStatus.choiceResponse) {
-    generateChoiceResponse();
+    // respond to choices from the user
+    else if (randomValue < chatStatus.playerMsgResponse + chatStatus.choiceResponse) {
+      generateChoiceResponse();
 
-    // decay chance
-    chatStatus.choiceResponse = chatStatus.choiceResponse*0.75;
-    if (chatStatus.choiceResponseAcc > 6) {
-      chatStatus.choiceResponse = 0;
-      chatStatus.choiceResponseAcc = 0;
+      // decay chance
+      chatStatus.choiceResponse = chatStatus.choiceResponse*0.75;
+      if (chatStatus.choiceResponseAcc > 6) {
+        chatStatus.choiceResponse = 0;
+        chatStatus.choiceResponseAcc = 0;
+      }
+      else
+        chatStatus.choiceResponseAcc++;
     }
-    else
-      chatStatus.choiceResponseAcc++;
-  }
-  // greeting on startup
-  else if (randomValue < chatStatus.playerMsgResponse + 
-    chatStatus.choiceResponse + chatStatus.greeting) {
-    generateGreetingMsg();
+    // greeting on startup
+    else if (randomValue < chatStatus.playerMsgResponse + 
+      chatStatus.choiceResponse + chatStatus.greeting) {
+      generateGreetingMsg();
 
-    // decay chance
-    chatStatus.greeting = chatStatus.greeting*0.8;
-    if (chatStatus.greetingAcc > 14) {
-      chatStatus.greeting = 0;
-      chatStatus.greetingAcc = 0;
-      chatStatus.idle = 15;
-      chatStatus.nextChoice = 30;
+      // decay chance
+      chatStatus.greeting = chatStatus.greeting*0.8;
+      if (chatStatus.greetingAcc > 14) {
+        chatStatus.greeting = 0;
+        chatStatus.greetingAcc = 0;
+        chatStatus.idle = 15;
+        chatStatus.nextChoice = 30;
+      }
+      else
+        chatStatus.greetingAcc++;
     }
-    else
-      chatStatus.greetingAcc++;
-  }
-  // waiting if no choices are made for a while
-  else if (randomValue < chatStatus.playerMsgResponse + chatStatus.choiceResponse + 
-    chatStatus.greeting + chatStatus.waiting) { 
-      generateWaitingMsg();
-  }
-  // make comments on the current choice
-  else if (randomValue < chatStatus.playerMsgResponse + chatStatus.choiceResponse + 
-    chatStatus.greeting + chatStatus.waiting + chatStatus.nextChoice) { 
-      generateNextChoiceMsg();
-  }
-  // revert to idle messages if no other options are made
-  else {
-    generateIdleMsg();
+    // waiting if no choices are made for a while
+    else if (randomValue < chatStatus.playerMsgResponse + chatStatus.choiceResponse + 
+      chatStatus.greeting + chatStatus.waiting) { 
+        generateWaitingMsg();
+    }
+    // make comments on the current choice
+    else if (randomValue < chatStatus.playerMsgResponse + chatStatus.choiceResponse + 
+      chatStatus.greeting + chatStatus.waiting + chatStatus.nextChoice) { 
+        generateNextChoiceMsg();
+    }
+    // revert to idle messages if no other options are made
+    else {
+      generateIdleMsg();
+    }
   }
 }
 
@@ -1026,7 +1041,33 @@ function generateNextChoiceMsg() { // randomly generate a message about the next
     rC = choicesMade*3 + Math.round(random(0,2));
     c = choices[rC];
   }
-  if (viewers > initialViewers*1.5) { // happy
+  if (viewers < initialViewers*0.2) { // very toxic
+    r = Math.round(random(0, 14));
+      switch(r) {
+        case 0:
+          addMessage(newMessage(generateName(), "WHAT", 2));
+          break;
+        case 1:
+          addMessage(newMessage(generateName(), "THIS SUCKS", 2));
+          break;
+        case 2:
+          addMessage(newMessage(generateName(), "STOP", 2));
+          break;
+        case 3:
+          addMessage(newMessage(generateName(), "NO", 2));
+          break;
+        case 4:
+          addMessage(newMessage(generateName(), "I'M LEAVING", 2));
+          break;
+        case 5:
+          addMessage(newMessage(generateName(), "This is pointless", 2));
+          break;
+        default:
+          addMessage(newMessage(generateName(), ":(", 3));
+          break;
+      }
+  }
+  else if (viewers > initialViewers*1.5) { // happy
     if (c.vFactor > 1) { // pro
       r = Math.round(random(0, 14));
       switch(r) {
@@ -1647,20 +1688,37 @@ function getSecondsSinceChoice() { // gets the time elapsed since a choice has b
 }
 
 function generateLoopingChoices() { // generates a set of random choices
+  displayCanvas(canvasFunctions);
   let r1, r2, r3;
-  // ensure choices are not the same
-  r1 = 0;
-  loopChoiceA = choicesLoop[r1];
-  r2 = Math.round(random(0, choicesLoop.length - 1));
-  while (r2 == r1 || r2 == prevLCB)
+  if (viewers < initialViewers*0.1 && !isEndingB) {
+    loopChoiceA = newChoice("delete the chat", -1, 0.1, 1, function E0() {isEndingB = true;});
+    loopChoiceB = newChoice("delete the chat", -1, 0.1, 1, function E0() {isEndingB = true;});
+    loopChoiceC = newChoice("delete the chat", -1, 0.1, 1, function E0() {isEndingB = true;});
+  }
+  else if (viewers > initialViewers*3) {
+    loopChoiceA = newChoice("become the chat", -1, 10, 1, function E1() {isEndingA = true; msgRows = Math.round(msgRows/2) + 3;});
+    loopChoiceB = newChoice("become the chat", -1, 10, 1, function E1() {isEndingA = true; msgRows = Math.round(msgRows/2) + 3;});
+    loopChoiceC = newChoice("become the chat", -1, 10, 1, function E1() {isEndingA = true; msgRows = Math.round(msgRows/2) + 3;});
+  }
+  else {
+    // ensure choices are not the same
+    r1 = 0;
+    if (isRandomizing)
+      loopChoiceA = newChoice("stop randomizing \neverything", -2, 1, 1, function R0() {isRandomizing = false;});
+    else
+      loopChoiceA = choicesLoop[r1];
+
     r2 = Math.round(random(0, choicesLoop.length - 1));
-  loopChoiceB = choicesLoop[r2];
-  r3 = Math.round(random(0, choicesLoop.length - 1));  
-  while (r3 == r2 || r3 == r1 || r3 == prevLCC)
-    r3 = Math.round(random(0, choicesLoop.length - 1));
-  loopChoiceC = choicesLoop[r3];
-  prevLCB = r2;
-  prevLCC = r3;
+    while (r2 == r1 || r2 == prevLCB || ((r2 == 8 || r2 == 9) && isRandomizing) || (r2 > 9 && isEndingB))
+      r2 = Math.round(random(0, choicesLoop.length - 1));
+    loopChoiceB = choicesLoop[r2];
+    r3 = Math.round(random(0, choicesLoop.length - 1));  
+    while (r3 == r2 || r3 == r1 || r3 == prevLCC || ((r3 == 8 || r3 == 9) && isRandomizing) || (r3 > 9 && isEndingB))
+      r3 = Math.round(random(0, choicesLoop.length - 1));
+    loopChoiceC = choicesLoop[r3];
+    prevLCB = r2;
+    prevLCC = r3;
+  }
 }
 
 /*
@@ -1711,41 +1769,45 @@ function makeChoice(n, id) { //* trigger events from making a choice,
 }
 
 function makeLoopingChoice(i) { // makes a loopable choice
-  let c;
-  if (i == 1)
-    c = loopChoiceA;
-  else if (i == 2)
-    c = loopChoiceB;
+  if (!isEndingA) {
+    let c;
+    if (i == 1)
+      c = loopChoiceA;
+    else if (i == 2)
+      c = loopChoiceB;
+    else
+      c = loopChoiceC;
+
+    choicesMade++;
+    if (c.id == -1 || c.id == -3)
+      prevChoice = newChoice("do that", 0, 1, 0, function Z() {});
+    else
+      prevChoice = c;
+
+    // set the prev best choice as the choice with the max value
+    let max = Math.max(loopChoiceA.vFactor, loopChoiceB.vFactor, loopChoiceC.vFactor);
+    if (max == loopChoiceA.vFactor)
+      prevBestChoice = loopChoiceA;
+    else if (max == loopChoiceB.vFactor)
+      prevBestChoice = loopChoiceB;
+    else    
+      prevBestChoice = loopChoiceC;
+
+    timeOfLastChoice = getSecondsElapsed();
+
+    canvasFunctions.push(c);
+    canvasFunctions.sort(compareChoices);
+
+    // calculate new viewer count
+    viewers = Math.round(viewers * c.vFactor);
+    displayedViewers = Math.round(random(0.98*viewers, 1.02*viewers));
+    triggerEvent(function c() {chatStatus.choiceResponse = 200;});
+
+    generateLoopingChoices();
+    return c;
+  }
   else
-    c = loopChoiceC;
-
-  choicesMade++;
-  if (c.id == -1 || c.id == -3)
-    prevChoice = newChoice("do that", 0, 1, 0, function Z() {});
-  else
-    prevChoice = c;
-
-  // set the prev best choice as the choice with the max value
-  let max = Math.max(loopChoiceA.vFactor, loopChoiceB.vFactor, loopChoiceC.vFactor);
-  if (max == loopChoiceA.vFactor)
-    prevBestChoice = loopChoiceA;
-  else if (max == loopChoiceB.vFactor)
-    prevBestChoice = loopChoiceB;
-  else    
-    prevBestChoice = loopChoiceC;
-
-  timeOfLastChoice = getSecondsElapsed();
-
-  canvasFunctions.push(c);
-  canvasFunctions.sort(compareChoices);
-
-  // calculate new viewer count
-  viewers = Math.round(viewers * c.vFactor);
-  displayedViewers = Math.round(random(0.98*viewers, 1.02*viewers));
-  triggerEvent(function c() {chatStatus.choiceResponse = 200;});
-
-  generateLoopingChoices();
-  return c;
+    return null;
 }
 
 function addMessage(m) { // add a message to the chat
@@ -1803,15 +1865,25 @@ function addMessage(m) { // add a message to the chat
       msgRows++;
     }
 
+    if (chatWidth < 500)
+      msgRows++;
+    else if (chatWidth < 450)
+      msgRows += 2;
+
     // once the chat is full of messages, remove the oldest message
     if ((msgRows-1)*25 > windowHeight-160) {
       removeLastMsg();
-      // remove an additional message if necessary
-      if ((msgRows-1)*25 > windowHeight-160) {      
+      // remove additional messages if necessary
+      while ((msgRows-1)*25 > windowHeight-160) {      
         removeLastMsg();
       }
     }
     msgRows++;
+    
+    if (chatWidth < 500) // accomodate chatWidth
+      msgRows--;
+    else if (chatWidth < 450)
+      msgRows -= 2;
 
     // format time stamp
     let time = getTimeElapsed();
@@ -1965,7 +2037,7 @@ function displayChoices(i) { // displays the current choises
   textStyle(NORMAL);
   fill(200);
 
-  if (isChoiceLooping) {
+  if (isChoiceLooping  && !isEndingA) {
     // indicate which option is being hovered over
     if (isHoveringA) {
       text(loopChoiceB.text[0].toUpperCase() + loopChoiceB.text.substring(1, loopChoiceB.text.length), ((windowWidth-chatWidth)/3)+10, windowHeight-40);
@@ -1992,7 +2064,7 @@ function displayChoices(i) { // displays the current choises
       text(loopChoiceC.text[0].toUpperCase() + loopChoiceC.text.substring(1, loopChoiceC.text.length), (2*(windowWidth-chatWidth)/3)+10, windowHeight-40);
     }    
   }
-  else {
+  else if (!isEndingA) {
     // indicate which option is being hovered over
     if (isHoveringA) {
       text(choices[i*3+1].text[0].toUpperCase() + choices[i*3+1].text.substring(1, choices[i*3+1].text.length), ((windowWidth-chatWidth)/3)+10, windowHeight-40);
@@ -2024,6 +2096,7 @@ function displayChoices(i) { // displays the current choises
 function displayCanvas(f) { // run functions that create the canvas
   canvasWidth = windowWidth - chatWidth;
   canvasHeight = windowHeight - 140;
+
   for (i = 0; i < f.length; i++) {
     if (f[i].id == -1 || f[i].id == -2) { // only run special choice functions once
       f[i].function();
@@ -2031,6 +2104,18 @@ function displayCanvas(f) { // run functions that create the canvas
     }
     else if (!isChoiceLooping || f[i].id == -4)
       f[i].function();
+  }
+
+  if (isRandomizing) {
+    shapeType = Math.round(random(1,3)); 
+    colorType = Math.round(random(1,3)); 
+    movementType = Math.round(random(1,3)); 
+    speedType = Math.round(random(1,3)); 
+    sizeType = Math.round(random(1,3)); 
+    fadeType = Math.round(random(1,3)); 
+    colorShiftType = Math.round(random(1,3)); 
+    outlineType = Math.round(random(1,3)); 
+    transType = Math.round(random(1,3)); 
   }
 
   let fade;
@@ -2065,7 +2150,7 @@ function displayCanvas(f) { // run functions that create the canvas
     if (transType == 2)               // subtle transparency
       shapeOpacity = 100;
     else if (transType == 3)          // strong transparency
-      shapeOpacity = 30;
+      shapeOpacity = 20;
     else                              // no transparency
       shapeOpacity = 255;
 
@@ -2234,26 +2319,49 @@ function displayFrontUI() { // display the front layer of UI
   line(2*(windowWidth-chatWidth)/3, windowHeight-70, 2*(windowWidth-chatWidth)/3, windowHeight);
 
   // header text
-  fill(200);
-  noStroke();
-  textFont('Trebuchet MS');
-  textAlign(CENTER);
-  textStyle(BOLD);
-  textSize(50);
-  if (playerName == "You")
-    text(playerName+" are Streaming LIVE", (windowWidth - chatWidth)/2, 50);
-  else
-    text(playerName+" is Streaming LIVE", (windowWidth - chatWidth)/2, 50);  
+  if (!isEndingA) {
+    fill(200);
+    noStroke();
+    textFont('Trebuchet MS');
+    textAlign(CENTER);
+    textStyle(BOLD);
+    textSize(50);
+    if (playerName == "You")
+      text(playerName+" are Streaming LIVE", (windowWidth - chatWidth)/2, 50);
+    else
+      text(playerName+" is Streaming LIVE", (windowWidth - chatWidth)/2, 50);  
+  }
   
   // viewer count
-  textStyle(NORMAL);
-  textSize(25);
-  text(displayedViewers + "\nWatching Now", windowWidth-195-(chatWidth-195)/2, windowHeight-45);
-  textAlign(LEFT);
+  if (chatWidth > 200) {
+    fill(200);
+    noStroke();
+    textFont('Trebuchet MS');
+    textAlign(CENTER);
+    textStyle(NORMAL);
+    textSize(25);
+    if (isEndingA && !(chatWidth < windowWidth))
+      text(displayedViewers + "\nWatching Now", (windowWidth/2)-195, windowHeight-45);
+    else
+      text(displayedViewers + "\nWatching Now", windowWidth-195-(chatWidth-195)/2, windowHeight-45);
+    textAlign(LEFT);
+  }
 
   // position input and button
-  input.position(windowWidth - chatWidth + 1, windowHeight - 105);
-  button.position(input.x+chatWidth-50, input.y);
+  if (chatWidth < 50) {
+    input.position(windowWidth - chatWidth + 100, windowHeight - 105);
+    button.position(input.x+chatWidth-50, input.y);
+  }
+  else if (chatWidth > 700) {
+    input.position(windowWidth - chatWidth + 5, windowHeight - 105);
+    button.position(input.x+chatWidth-50, input.y);
+  }
+  else {
+    input.position(windowWidth - chatWidth + 1, windowHeight - 105);
+    button.position(input.x+chatWidth-50, input.y);
+  }
+
+  input.style('width', parseInt(chatWidth) + 'px');
   
   // if text box is empty or user is pressing escape,
   // display a prompt in the text box.
