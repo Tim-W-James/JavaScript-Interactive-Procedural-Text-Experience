@@ -3,8 +3,6 @@
 *   Tim James - u6947396
 */
 
-// TODO add sounds
-
 // variable declaration
 let fontAnonymous, input, button, player, users, viewers, displayedViewers;
 let canvasWidth, canvasHeight, chatStatus, initialTime;
@@ -259,14 +257,14 @@ function instantiateChoices() { // create a list of possible choices, where 3 ar
 
   choicesLoop = [    
     newChoice("keep things the \nsame", 0, 1, 1, function S() {}),
-    newChoice("add a random \ncircle", -2, 1.1, 1, function L0() {
-      fill(random(0,255), random(0,255), random(0,255));
+    newChoice("add random circles", -4, 1.1, 1, function L0() {
+      fill(random(0,255), random(0,50));
       ellipse(random(10, canvasWidth-10), random(80, canvasHeight-10), random(50,200));}),
-    newChoice("add a random \nsquare", -2, 0.95, 1, function L1() {
-      fill(random(0,255), random(0,255), random(0,255));
+    newChoice("add random squares", -4, 0.95, 1, function L1() {
+      fill(random(0,255), random(0,50));
       rect(random(10, canvasWidth-10), random(80, canvasHeight-10), random(50,200), random(50,200));}),
-    newChoice("add a random \ntriangle", -2, 0.8, 1, function L2() {
-      fill(random(0,255), random(0,255), random(0,255));
+    newChoice("add random triangles", -4, 0.8, 1, function L2() {
+      fill(random(0,255), random(0,50));
       myTriangle(random(10, canvasWidth-10), random(80, canvasHeight-10), random(50,200));}),
     newChoice("increase shape size", -2, 1.5, 1, function L3() {sizeModifier += 40;}),
     newChoice("decrease shape size", -2, 0.6, 1, function L4() {if (sizeModifier > -200) {sizeModifier -= 40;}}),
@@ -282,10 +280,8 @@ function instantiateChoices() { // create a list of possible choices, where 3 ar
     // newChoice("rotate everything", -1, 0.75, 1, function Z2() {rotationModifier += (random(-0.01, 0.01));reloadBG();}),
     // newChoice("translate everything", -1, 0.75, 1, function Z2() {translationXModifier += random(-5,5); translationYModifier += random(-5,5);reloadBG();}),
     newChoice("randomly change \nyour name", -1, 1.2, 1, function Z3() {playerName = generateName();}),
-    newChoice("say \"hi\" in \nchat", -1, 1.5, 1, function Z4() {addMessage(newMessage("", "Hi!", 0));}),
-    newChoice("say \"hi\" in \nchat", -1, 1, 1, function Z4() {addMessage(newMessage("", "I didn't choose this.", 0));}),
+    newChoice("say \"Hi!\" in \nchat", -1, 1.5, 1, function Z4() {addMessage(newMessage("", "Hi!", 0));}),
     newChoice("kick a member of \nchat", -1, 0.5, 1, function Z5() {addMessage(newMessage("", "User @"+generateName()+" has been kicked from the chat", 1));}),
-    newChoice("add a moderator to \nchat", -1, 0.75, 1, function Z6() {addMessage(newMessage("", "Moderator @"+generateName()+" has joined the chat", 1));}),
     newChoice("make the chat smaller", -1, 0.25, 1, function Z7() {if (chatWidth > 400) {chatWidth -= 40;} reCalcMsgRows();}),
     newChoice("make the chat larger", -1, 2, 1, function Z8() {if (chatWidth < 600) {chatWidth += 40;} reCalcMsgRows();})
   ]
@@ -2524,6 +2520,11 @@ function keyPressed() { // handle keyboard input
   // pressing enter or return will write a message
   if (keyCode === ENTER || keyCode === RETURN)
     writeMessage();
+
+  // save a screenshot
+  // if (keyCode === ENTER) {
+  //   saveCanvas("thumbnail.png");
+  // }
 }
 
 function mousePressed() { // handle clicking on choices
