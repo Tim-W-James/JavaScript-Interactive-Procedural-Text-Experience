@@ -274,9 +274,9 @@ function instantiateChoices() { // create a list of possible choices, where 3 ar
       backgroundType = Math.round(random(1,3)); shapeType = Math.round(random(1,3)); colorType = Math.round(random(1,3)); movementType = Math.round(random(1,3)); 
       speedType = Math.round(random(1,3)); sizeType = Math.round(random(1,3)); fadeType = Math.round(random(1,3)); colorShiftType = Math.round(random(1,3)); 
       outlineType = Math.round(random(1,3)); transType = Math.round(random(1,3));}),
-    newChoice("constantly randomize everything", -2, 1.3, 1, function L8() {isRandomizing = true;}),
-    newChoice("pick this choice", -1, 1.7, 1, function Z0() {}),
-    newChoice("don't pick this \nchoice", -1, 0.3, 1, function Z1() {}),
+    newChoice("constantly randomize \neverything", -2, 1.3, 1, function L8() {isRandomizing = true;}),
+    newChoice("pay close attention \nto the chat", -1, 1.7, 1, function Z0() {}),
+    newChoice("ignore the chat", -1, 0.3, 1, function Z1() {}),
     // newChoice("rotate everything", -1, 0.75, 1, function Z2() {rotationModifier += (random(-0.01, 0.01));reloadBG();}),
     // newChoice("translate everything", -1, 0.75, 1, function Z2() {translationXModifier += random(-5,5); translationYModifier += random(-5,5);reloadBG();}),
     newChoice("randomly change \nyour name", -1, 1.2, 1, function Z3() {playerName = generateName();}),
