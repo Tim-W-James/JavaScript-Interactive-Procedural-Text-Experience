@@ -153,6 +153,9 @@ function draw() {
       }
       minMsgDelay = 7;
       maxMsgDelay = 10;
+      rotationModifier = -0.01;
+      translationXModifier = -10;
+      translationYModifier = 10;
     }
 
     if (choicesMade > 9 && !isChoiceLooping) { // once out of choices, loop
@@ -437,7 +440,8 @@ function instantiateUsers() { // create a list of all identified users
     "Alive",
     "Hungry",
     "Inner",
-    "Explosive"
+    "Explosive",
+    "Arctic"
   ];
   nouns = [
     "Shadow",
@@ -503,8 +507,8 @@ function instantiateUsers() { // create a list of all identified users
     "Rake",
     "Hydrant",
     "Ants",
-    "Cobweb"
-
+    "Cobweb",
+    "Monkey"
   ];
 
   // assign names and status to users
@@ -537,8 +541,7 @@ function instantiateChatStatus() { // create a list of chat status properties
     choiceResponseAcc : 0,
     playerMsgResponse : 0,
     playerMsgResponseAcc : 0,
-    sequence : 0,
-    sequenceAcc : 0
+    spam : 0
   }
 }
 
@@ -618,7 +621,7 @@ function startStreaming() { // setup in preparation for streaming
 function generateNextMsg() { // decide what message to add to chat, based on current events
   if (chatWidth > 100) {
     let totalValues = chatStatus.playerMsgResponse + chatStatus.choiceResponse + chatStatus.greeting 
-      + chatStatus.waiting + chatStatus.nextChoice + chatStatus.idle ;
+      + chatStatus.waiting + chatStatus.nextChoice + chatStatus.idle + chatStatus.spam;
     let randomValue = random(0, totalValues);
 
     // respond to input from the user
@@ -665,6 +668,7 @@ function generateNextMsg() { // decide what message to add to chat, based on cur
         chatStatus.greetingAcc = 0;
         chatStatus.idle = 15;
         chatStatus.nextChoice = 30;
+        chatStatus.spam = 2;
       }
       else
         chatStatus.greetingAcc++;
@@ -684,6 +688,14 @@ function generateNextMsg() { // decide what message to add to chat, based on cur
         generateEndingAMsg();
       else
         generateNextChoiceMsg();
+    }
+    // generate a sequence of spam comments
+    else if (randomValue < chatStatus.playerMsgResponse + chatStatus.choiceResponse + 
+      chatStatus.greeting + chatStatus.waiting + chatStatus.nextChoice + chatStatus.spam) {
+      if (viewers > initialViewers*3)
+        generateEndingAMsg();
+      else
+        generateSpamMsg();
     }
     // revert to idle messages if no other options are made
     else {
@@ -1689,6 +1701,18 @@ function generateEndingAResponse() { // generate a message for ending A user res
   }
 }
 
+function generateSpamMsg() {  // generate a sequence of spam messages
+  let u = generateName();
+  for (let itr = Math.round(random(3,6)); itr > 1; itr--) {    
+    let m = "";
+    for (let ln = Math.round(random(2,10)); ln > 1; ln--) {
+      m += String.fromCharCode(Math.round(random(41, 127)));
+    }
+    addMessage(newMessage(u, m, 3));
+  }
+  addMessage(newMessage("", "User @"+u+" has been kicked from the chat", 1));
+}
+
 function generateName() { // randomly generate a name
   let tempStr = generateSName(0, Math.random() >= 0.5, Math.random() >= 0.6, Math.random() >= 0.9);
   lastUser = currentUser;
@@ -1718,8 +1742,6 @@ function generateSName(t, isReal, addNumber, isE) { // randomly generate a name,
     }
     a = adjectives[rA];
     n = nouns[rN];
-    
-    
 
     // random method of concatenation
     if (Math.random() >= 0.5) {
