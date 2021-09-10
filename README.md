@@ -31,7 +31,7 @@
   <p align="center">
     A JavaScript interactive art piece that lets players create their own pictures in front of a simulated live audience.
     <br />
-    This project was created during my university studies at ANU in <b>2020</b> and has been transferred from the <b>ANU GitLab</b> server.
+    This project was created during my university studies at ANU in <b>2019</b> and has been transferred from the <b>ANU GitLab</b> server.
     <br />
 <!--     <a href="https://github.com/Tim-W-James/repo_name"><strong>Explore the docs »</strong></a>
     <br /> 
@@ -84,7 +84,7 @@
 
 [![Screen Shot][product-screenshot]](https://github.com/Tim-W-James/JavaScript-Interactive-Procedural-Text-Experience)
 
-A JavaScript interactive art piece that lets players create their own pictures in front of a simulated live audience. Read the [artist statement](https://github.com/Tim-W-James/JavaScript-Interactive-Procedural-Text-Experience/blob/master/artist-statement.md) for the thinking behind the project.
+A JavaScript interactive experience where players create their own pictures in front of a simulated live audience that reacts to the decisions of the player. The project is part of the course COMP1720 at ANU, and a showcase can be found [here](https://comp1720.cecs.anu.edu.au/u6947396/comp1720-2019-major-project/). Read the [artist statement](https://github.com/Tim-W-James/JavaScript-Interactive-Procedural-Text-Experience/blob/master/artist-statement.md) for the thinking behind the project.
 
 ### Built With
 
