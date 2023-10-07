@@ -84,7 +84,10 @@
 
 [![Screen Shot][product-screenshot]](https://github.com/Tim-W-James/JavaScript-Interactive-Procedural-Text-Experience)
 
-A JavaScript interactive experience where players create their own pictures in front of a simulated live audience that reacts to the decisions of the player. The project is part of the course COMP1720 at ANU, and a showcase can be found [here](https://comp1720.cecs.anu.edu.au/u6947396/comp1720-2019-major-project/). Read the [artist statement](https://github.com/Tim-W-James/JavaScript-Interactive-Procedural-Text-Experience/blob/master/artist-statement.md) for the thinking behind the project.
+A JavaScript interactive experience where players create their own pictures in front of a simulated live audience that reacts to the decisions of the player. The project is part of the course COMP1720 at ANU.
+
+- [View live demo](https://interactive-procedural-art.timjames.dev/)
+- Read the [artist statement](https://github.com/Tim-W-James/JavaScript-Interactive-Procedural-Text-Experience/blob/master/artist-statement.md) for the thinking behind the project.
 
 ### Built With
 

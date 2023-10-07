@@ -1,22 +1,21 @@
 <!DOCTYPE html>
 <html lang="">
-
   <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="icon" href="assets/logo.ico">
-	<title>Streaming LIVE - Switch</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="assets/logo.ico" />
+    <title>Streaming LIVE - Switch</title>
 
-	<!-- this is the main p5 library -->
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.min.js"></script>
+    <!-- this is the main p5 library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.min.js"></script>
 
-	<!-- this is the p5 sound library -->
-	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.sound.js"></script> -->
+    <!-- this is the p5 sound library -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.sound.js"></script> -->
 
-	<!-- this is the p5 DOM library -->
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.js"></script>
+    <!-- this is the p5 DOM library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.js"></script>
 
-	<!--
+    <!--
 		 Note: if you have no access to the internet, the cdnjs.cloudflare.com links
 		 above (and therefore your sketch) won't work.
 
@@ -30,41 +29,42 @@
 		 <script src="lib/p5/addons/p5.sound.js"></script>
 		 -->
 
-	<!-- here's where we include the actual sketch file -->
-	<script src="sketch.js"></script>
+    <!-- here's where we include the actual sketch file -->
+    <script src="sketch.js"></script>
 
-	<!-- CSS styling for "back to gallery" button, remove scrollbars -->
-	<style>
-	 body {
-	   padding: 0;
-	   margin: 0;
-	   overflow: hidden;
-	 }
-	 nav {
-	   position: absolute;
-	   bottom: 0;
-	   right: 0;
-	   font-size: 24px;
-	   color: #eee;
-	   background-color: #222;
-	   padding: 20px;
-	   opacity: 0.5;
-	   transition: opacity 0.3s;
-	   font-family: sans-serif;
-
-	 }
-	 nav > a {
-	   color: #eee;
-	 }
-	 nav:hover {
-	   opacity: 1;
-	 }
-	</style>
-
+    <!-- CSS styling for "back to gallery" button, remove scrollbars -->
+    <style>
+      body {
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+      }
+      nav {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        font-size: 24px;
+        color: #eee;
+        background-color: #222;
+        padding: 20px;
+        opacity: 0.5;
+        transition: opacity 0.3s;
+        font-family: sans-serif;
+      }
+      nav > a {
+        color: #eee;
+      }
+      nav:hover {
+        opacity: 1;
+      }
+    </style>
   </head>
 
   <body>
-	<nav><a href=".." style="text-decoration: none;">back to gallery</a></nav>
+    <nav>
+      <a href="https://timjames.dev/projects" style="text-decoration: none"
+        >back to gallery</a
+      >
+    </nav>
   </body>
-
 </html>
